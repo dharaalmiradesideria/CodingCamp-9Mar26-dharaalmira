@@ -137,8 +137,10 @@ class TaskListComponent {
 
   init() {
     this.loadTasks();
-    this.render() {
-      const list = this.container.querySelector('.task-list');
+    this.render();
+  }
+  render() {
+  const list = this.container.querySelector('.task-list');
   if (!list) return;
 
   list.innerHTML = '';
@@ -148,7 +150,7 @@ class TaskListComponent {
     li.textContent = task.text;
     list.appendChild(li);
   });
-  }
+}
 
   loadTasks() {
     try {
@@ -226,7 +228,9 @@ class QuickLinksComponent {
 
   init() {
     this.loadLinks();
-    this.render() {
+    this.render();
+  }
+  render() {
   const list = this.container.querySelector('.link-list');
   if (!list) return;
 
@@ -235,6 +239,7 @@ class QuickLinksComponent {
   this.links.forEach(link => {
     const li = document.createElement('li');
     const a = document.createElement('a');
+
     a.href = link.url;
     a.textContent = link.name;
     a.target = "_blank";
@@ -242,8 +247,7 @@ class QuickLinksComponent {
     li.appendChild(a);
     list.appendChild(li);
   });
-
-  }
+}
 
   loadLinks() {
     try {
