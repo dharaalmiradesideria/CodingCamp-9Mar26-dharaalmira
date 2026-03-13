@@ -203,10 +203,6 @@ class TaskListComponent {
     // Implementation pending
   }
 
-  render() {
-    // Implementation pending
-  }
-
   renderTask(task) {
     // Implementation pending
   }
@@ -293,10 +289,6 @@ class QuickLinksComponent {
   }
 
   deleteLink(id) {
-    // Implementation pending
-  }
-
-  render() {
     // Implementation pending
   }
 
