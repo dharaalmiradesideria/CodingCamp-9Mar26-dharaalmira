@@ -137,6 +137,7 @@ class TaskListComponent {
 
   init() {
     this.loadTasks();
+    this.render();
   }
 
   loadTasks() {
@@ -215,6 +216,7 @@ class QuickLinksComponent {
 
   init() {
     this.loadLinks();
+    this.render();
   }
 
   loadLinks() {
