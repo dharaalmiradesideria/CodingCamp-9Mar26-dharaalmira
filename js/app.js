@@ -136,7 +136,7 @@ class TaskListComponent {
   }
 
   init() {
-    this.loadLinks();
+    this.loadTasks();
   }
 
   loadTasks() {
