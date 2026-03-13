@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Task 6.2 - Link CRUD Operations</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .test-section h3 {
+      margin-top: 0;
+    }
+    .pass {
+      color: green;
+      font-weight: bold;
+    }
+    .fail {
+      color: red;
+      font-weight: bold;
+    }
+    .result {
+      margin: 10px 0;
+      padding: 10px;
+      background: #f5f5f5;
+      border-radius: 3px;
+    }
+    button {
+      margin: 5px;
+      padding: 8px 15px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test Task 6.2: Link CRUD Operations</h1>
+  
+  <div class="test-section">
+    <h3>Test 1: addLink() with valid data</h3>
+    <button onclick="testAddLinkValid()">Run Test</button>
+    <div id="test1-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test 2: addLink() with empty name</h3>
+    <button onclick="testAddLinkEmptyName()">Run Test</button>
+    <div id="test2-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test 3: addLink() with name > 100 chars</h3>
+    <button onclick="testAddLinkLongName()">Run Test</button>
+    <div id="test3-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test 4: addLink() with invalid URL (no http/https)</h3>
+    <button onclick="testAddLinkInvalidUrl()">Run Test</button>
+    <div id="test4-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test 5: editLink() with valid data</h3>
+    <button onclick="testEditLinkValid()">Run Test</button>
+    <div id="test5-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test 6: editLink() with invalid id</h3>
+    <button onclick="testEditLinkInvalidId()">Run Test</button>
+    <div id="test6-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test 7: editLink() with empty name</h3>
+    <button onclick="testEditLinkEmptyName()">Run Test</button>
+    <div id="test7-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test 8: editLink() with invalid URL</h3>
+    <button onclick="testEditLinkInvalidUrl()">Run Test</button>
+    <div id="test8-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test 9: deleteLink() with valid id</h3>
+    <button onclick="testDeleteLinkValid()">Run Test</button>
+    <div id="test9-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test 10: deleteLink() with invalid id</h3>
+    <button onclick="testDeleteLinkInvalid()">Run Test</button>
+    <div id="test10-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Test 11: Verify saveLinks() is called after mutations</h3>
+    <button onclick="testSaveLinksCall()">Run Test</button>
+    <div id="test11-result" class="result"></div>
+  </div>
+
+  <div class="test-section">
+    <h3>Run All Tests</h3>
+    <button onclick="runAllTests()">Run All Tests</button>
+    <div id="all-results" class="result"></div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    // Helper function to create a fresh component for testing
+    function createTestComponent() {
+      const container = document.createElement('div');
+      const storageKey = 'test-links-' + Date.now();
+      const component = new QuickLinksComponent(container, storageKey);
+      component.links = []; // Start with empty array
+      return { component, storageKey };
+    }
+
+    // Helper function to clean up test storage
+    function cleanupStorage(storageKey) {
+      localStorage.removeItem(storageKey);
+    }
+
+    function testAddLinkValid() {
+      const { component, storageKey } = createTestComponent();
+      const result = component.addLink('GitHub', 'https://github.com');
+      const resultDiv = document.getElementById('test1-result');
+      
+      if (result === true && component.links.length === 1 && 
+          component.links[0].name === 'GitHub' && 
+          component.links[0].url === 'https://github.com') {
+        resultDiv.innerHTML = '<span class="pass">✓ PASS</span> - Link added successfully';
+      } else {
+        resultDiv.innerHTML = '<span class="fail">✗ FAIL</span> - Link not added correctly';
+      }
+      cleanupStorage(storageKey);
+    }
+
+    function testAddLinkEmptyName() {
+      const { component, storageKey } = createTestComponent();
+      const result = component.addLink('   ', 'https://example.com');
+      const resultDiv = document.getElementById('test2-result');
+      
+      if (result === false && component.links.length === 0) {
+        resultDiv.innerHTML = '<span class="pass">✓ PASS</span> - Empty name rejected';
+      } else {
+        resultDiv.innerHTML = '<span class="fail">✗ FAIL</span> - Empty name should be rejected';
+      }
+      cleanupStorage(storageKey);
+    }
+
+    function testAddLinkLongName() {
+      const { component, storageKey } = createTestComponent();
+      const longName = 'a'.repeat(101);
+      const result = component.addLink(longName, 'https://example.com');
+      const resultDiv = document.getElementById('test3-result');
+      
+      if (result === false && component.links.length === 0) {
+        resultDiv.innerHTML = '<span class="pass">✓ PASS</span> - Long name (>100 chars) rejected';
+      } else {
+        resultDiv.innerHTML = '<span class="fail">✗ FAIL</span> - Long name should be rejected';
+      }
+      cleanupStorage(storageKey);
+    }
+
+    function testAddLinkInvalidUrl() {
+      const { component, storageKey } = createTestComponent();
+      const result = component.addLink('Example', 'www.example.com');
+      const resultDiv = document.getElementById('test4-result');
+      
+      if (result === false && component.links.length === 0) {
+        resultDiv.innerHTML = '<span class="pass">✓ PASS</span> - Invalid URL rejected';
+      } else {
+        resultDiv.innerHTML = '<span class="fail">✗ FAIL</span> - Invalid URL should be rejected';
+      }
+      cleanupStorage(storageKey);
+    }
+
+    function testEditLinkValid() {
+      const { component, storageKey } = createTestComponent();
+      component.addLink('GitHub', 'https://github.com');
+      const linkId = component.links[0].id;
+      const result = component.editLink(linkId, 'GitLab', 'https://gitlab.com');
+      const resultDiv = document.getElementById('test5-result');
+      
+      if (result === true && component.links[0].name === 'GitLab' && 
+          component.links[0].url === 'https://gitlab.com') {
+        resultDiv.innerHTML = '<span class="pass">✓ PASS</span> - Link edited successfully';
+      } else {
+        resultDiv.innerHTML = '<span class="fail">✗ FAIL</span> - Link not edited correctly';
+      }
+      cleanupStorage(storageKey);
+    }
+
+    function testEditLinkInvalidId() {
+      const { component, storageKey } = createTestComponent();
+      component.addLink('GitHub', 'https://github.com');
+      const result = component.editLink('invalid-id', 'GitLab', 'https://gitlab.com');
+      const resultDiv = document.getElementById('test6-result');
+      
+      if (result === false && component.links[0].name === 'GitHub') {
+        resultDiv.innerHTML = '<span class="pass">✓ PASS</span> - Invalid id rejected';
+      } else {
+        resultDiv.innerHTML = '<span class="fail">✗ FAIL</span> - Invalid id should be rejected';
+      }
+      cleanupStorage(storageKey);
+    }
+
+    function testEditLinkEmptyName() {
+      const { component, storageKey } = createTestComponent();
+      component.addLink('GitHub', 'https://github.com');
+      const linkId = component.links[0].id;
+      const result = component.editLink(linkId, '  ', 'https://gitlab.com');
+      const resultDiv = document.getElementById('test7-result');
+      
+      if (result === false && component.links[0].name === 'GitHub') {
+        resultDiv.innerHTML = '<span class="pass">✓ PASS</span> - Empty name rejected';
+      } else {
+        resultDiv.innerHTML = '<span class="fail">✗ FAIL</span> - Empty name should be rejected';
+      }
+      cleanupStorage(storageKey);
+    }
+
+    function testEditLinkInvalidUrl() {
+      const { component, storageKey } = createTestComponent();
+      component.addLink('GitHub', 'https://github.com');
+      const linkId = component.links[0].id;
+      const result = component.editLink(linkId, 'GitLab', 'ftp://gitlab.com');
+      const resultDiv = document.getElementById('test8-result');
+      
+      if (result === false && component.links[0].url === 'https://github.com') {
+        resultDiv.innerHTML = '<span class="pass">✓ PASS</span> - Invalid URL rejected';
+      } else {
+        resultDiv.innerHTML = '<span class="fail">✗ FAIL</span> - Invalid URL should be rejected';
+      }
+      cleanupStorage(storageKey);
+    }
+
+    function testDeleteLinkValid() {
+      const { component, storageKey } = createTestComponent();
+      component.addLink('GitHub', 'https://github.com');
+      const linkId = component.links[0].id;
+      const result = component.deleteLink(linkId);
+      const resultDiv = document.getElementById('test9-result');
+      
+      if (result === true && component.links.length === 0) {
+        resultDiv.innerHTML = '<span class="pass">✓ PASS</span> - Link deleted successfully';
+      } else {
+        resultDiv.innerHTML = '<span class="fail">✗ FAIL</span> - Link not deleted correctly';
+      }
+      cleanupStorage(storageKey);
+    }
+
+    function testDeleteLinkInvalid() {
+      const { component, storageKey } = createTestComponent();
+      component.addLink('GitHub', 'https://github.com');
+      const result = component.deleteLink('invalid-id');
+      const resultDiv = document.getElementById('test10-result');
+      
+      if (result === false && component.links.length === 1) {
+        resultDiv.innerHTML = '<span class="pass">✓ PASS</span> - Invalid id rejected';
+      } else {
+        resultDiv.innerHTML = '<span class="fail">✗ FAIL</span> - Invalid id should be rejected';
+      }
+      cleanupStorage(storageKey);
+    }
+
+    function testSaveLinksCall() {
+      const { component, storageKey } = createTestComponent();
+      
+      // Test addLink saves
+      component.addLink('GitHub', 'https://github.com');
+      const saved1 = localStorage.getItem(storageKey);
+      const parsed1 = JSON.parse(saved1);
+      
+      // Test editLink saves
+      const linkId = component.links[0].id;
+      component.editLink(linkId, 'GitLab', 'https://gitlab.com');
+      const saved2 = localStorage.getItem(storageKey);
+      const parsed2 = JSON.parse(saved2);
+      
+      // Test deleteLink saves
+      component.deleteLink(linkId);
+      const saved3 = localStorage.getItem(storageKey);
+      const parsed3 = JSON.parse(saved3);
+      
+      const resultDiv = document.getElementById('test11-result');
+      
+      if (parsed1.length === 1 && parsed2[0].name === 'GitLab' && parsed3.length === 0) {
+        resultDiv.innerHTML = '<span class="pass">✓ PASS</span> - saveLinks() called after all mutations';
+      } else {
+        resultDiv.innerHTML = '<span class="fail">✗ FAIL</span> - saveLinks() not called correctly';
+      }
+      cleanupStorage(storageKey);
+    }
+
+    function runAllTests() {
+      testAddLinkValid();
+      testAddLinkEmptyName();
+      testAddLinkLongName();
+      testAddLinkInvalidUrl();
+      testEditLinkValid();
+      testEditLinkInvalidId();
+      testEditLinkEmptyName();
+      testEditLinkInvalidUrl();
+      testDeleteLinkValid();
+      testDeleteLinkInvalid();
+      testSaveLinksCall();
+      
+      document.getElementById('all-results').innerHTML = '<span class="pass">All tests executed. Check individual results above.</span>';
+    }
+  </script>
+</body>
+</html>

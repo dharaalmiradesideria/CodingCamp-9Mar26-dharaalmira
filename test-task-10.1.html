@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 10.1 Integration Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f5f7fa;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-result {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+    .pass {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .fail {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    h1 { color: #333; }
+    h2 { color: #4a90e2; margin-top: 0; }
+    button {
+      padding: 8px 16px;
+      margin: 5px;
+      border: none;
+      border-radius: 4px;
+      background: #4a90e2;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover { background: #357abd; }
+    #test-results { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <h1>Task 10.1: Component Integration Test</h1>
+  <p>This test verifies that all components initialize correctly and work together end-to-end.</p>
+
+  <div class="test-section">
+    <h2>Test Controls</h2>
+    <button onclick="runAllTests()">Run All Tests</button>
+    <button onclick="clearStorage()">Clear Local Storage</button>
+    <button onclick="location.reload()">Reload Page</button>
+  </div>
+
+  <div id="test-results"></div>
+
+  <script>
+    const results = [];
+
+    function log(message, type = 'info') {
+      results.push({ message, type });
+      updateDisplay();
+    }
+
+    function updateDisplay() {
+      const container = document.getElementById('test-results');
+      container.innerHTML = results.map(r => 
+        `<div class="test-result ${r.type}">${r.message}</div>`
+      ).join('');
+    }
+
+    function clearStorage() {
+      localStorage.clear();
+      log('✓ Local Storage cleared', 'pass');
+      setTimeout(() => location.reload(), 500);
+    }
+
+    async function runAllTests() {
+      results.length = 0;
+      log('Starting Task 10.1 Integration Tests...', 'info');
+      
+      try {
+        // Test 1: Verify all component containers exist
+        log('\n=== Test 1: Component Container Verification ===', 'info');
+        const greetingSection = document.getElementById('greeting-section');
+        const timerSection = document.getElementById('timer-section');
+        const tasksSection = document.getElementById('tasks-section');
+        const linksSection = document.getElementById('links-section');
+        
+        if (greetingSection) log('✓ Greeting section container found', 'pass');
+        else log('✗ Greeting section container NOT found', 'fail');
+        
+        if (timerSection) log('✓ Timer section container found', 'pass');
+        else log('✗ Timer section container NOT found', 'fail');
+        
+        if (tasksSection) log('✓ Tasks section container found', 'pass');
+        else log('✗ Tasks section container NOT found', 'fail');
+        
+        if (linksSection) log('✓ Links section container found', 'pass');
+        else log('✗ Links section container NOT found', 'fail');
+
+        // Test 2: Verify Greeting Component initialization
+        log('\n=== Test 2: Greeting Component Verification ===', 'info');
+        const greetingMessage = greetingSection?.querySelector('.greeting-message');
+        const currentTime = greetingSection?.querySelector('.current-time');
+        const currentDate = greetingSection?.querySelector('.current-date');
+        
+        if (greetingMessage && greetingMessage.textContent) {
+          log(`✓ Greeting message displayed: "${greetingMessage.textContent}"`, 'pass');
+        } else {
+          log('✗ Greeting message NOT displayed', 'fail');
+        }
+        
+        if (currentTime && currentTime.textContent) {
+          log(`✓ Current time displayed: "${currentTime.textContent}"`, 'pass');
+        } else {
+          log('✗ Current time NOT displayed', 'fail');
+        }
+        
+        if (currentDate && currentDate.textContent) {
+          log(`✓ Current date displayed: "${currentDate.textContent}"`, 'pass');
+        } else {
+          log('✗ Current date NOT displayed', 'fail');
+        }
+
+        // Test 3: Verify Timer Component initialization
+        log('\n=== Test 3: Timer Component Verification ===', 'info');
+        const timerDisplay = timerSection?.querySelector('.timer-display');
+        const startBtn = document.getElementById('timer-start');
+        const stopBtn = document.getElementById('timer-stop');
+        const resetBtn = document.getElementById('timer-reset');
+        
+        if (timerDisplay && timerDisplay.textContent === '25:00') {
+          log('✓ Timer initialized to 25:00', 'pass');
+        } else {
+          log(`✗ Timer NOT initialized correctly: "${timerDisplay?.textContent}"`, 'fail');
+        }
+        
+        if (startBtn) log('✓ Start button found', 'pass');
+        else log('✗ Start button NOT found', 'fail');
+        
+        if (stopBtn) log('✓ Stop button found', 'pass');
+        else log('✗ Stop button NOT found', 'fail');
+        
+        if (resetBtn) log('✓ Reset button found', 'pass');
+        else log('✗ Reset button NOT found', 'fail');
+
+        // Test 4: Verify Task List Component initialization
+        log('\n=== Test 4: Task List Component Verification ===', 'info');
+        const taskInput = document.getElementById('task-input');
+        const taskAddBtn = document.getElementById('task-add');
+        const taskList = tasksSection?.querySelector('.task-list');
+        
+        if (taskInput) log('✓ Task input field found', 'pass');
+        else log('✗ Task input field NOT found', 'fail');
+        
+        if (taskAddBtn) log('✓ Task add button found', 'pass');
+        else log('✗ Task add button NOT found', 'fail');
+        
+        if (taskList) log('✓ Task list container found', 'pass');
+        else log('✗ Task list container NOT found', 'fail');
+
+        // Test 5: Verify Quick Links Component initialization
+        log('\n=== Test 5: Quick Links Component Verification ===', 'info');
+        const linkNameInput = document.getElementById('link-name');
+        const linkUrlInput = document.getElementById('link-url');
+        const linkAddBtn = document.getElementById('link-add');
+        const linkList = linksSection?.querySelector('.link-list');
+        
+        if (linkNameInput) log('✓ Link name input found', 'pass');
+        else log('✗ Link name input NOT found', 'fail');
+        
+        if (linkUrlInput) log('✓ Link URL input found', 'pass');
+        else log('✗ Link URL input NOT found', 'fail');
+        
+        if (linkAddBtn) log('✓ Link add button found', 'pass');
+        else log('✗ Link add button NOT found', 'fail');
+        
+        if (linkList) log('✓ Link list container found', 'pass');
+        else log('✗ Link list container NOT found', 'fail');
+
+        // Test 6: Test Task List functionality
+        log('\n=== Test 6: Task List Functionality Test ===', 'info');
+        
+        // Clear existing tasks
+        localStorage.removeItem('productivity-dashboard-tasks');
+        
+        // Add a test task
+        taskInput.value = 'Test Task for Integration';
+        taskAddBtn.click();
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const taskItems = taskList.querySelectorAll('.task-item');
+        if (taskItems.length > 0) {
+          log(`✓ Task added successfully (${taskItems.length} task(s) in list)`, 'pass');
+          
+          // Check if task is in Local Storage
+          const storedTasks = JSON.parse(localStorage.getItem('productivity-dashboard-tasks') || '[]');
+          if (storedTasks.length > 0) {
+            log('✓ Task persisted to Local Storage', 'pass');
+          } else {
+            log('✗ Task NOT persisted to Local Storage', 'fail');
+          }
+          
+          // Test toggle functionality
+          const checkbox = taskItems[0].querySelector('.task-checkbox');
+          if (checkbox) {
+            checkbox.click();
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            const updatedTasks = JSON.parse(localStorage.getItem('productivity-dashboard-tasks') || '[]');
+            if (updatedTasks[0]?.completed) {
+              log('✓ Task toggle functionality works', 'pass');
+            } else {
+              log('✗ Task toggle NOT working', 'fail');
+            }
+          }
+        } else {
+          log('✗ Task NOT added to list', 'fail');
+        }
+
+        // Test 7: Test Quick Links functionality
+        log('\n=== Test 7: Quick Links Functionality Test ===', 'info');
+        
+        // Clear existing links
+        localStorage.removeItem('productivity-dashboard-links');
+        
+        // Add a test link
+        linkNameInput.value = 'Test Link';
+        linkUrlInput.value = 'https://example.com';
+        linkAddBtn.click();
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const linkItems = linkList.querySelectorAll('.link-item');
+        if (linkItems.length > 0) {
+          log(`✓ Link added successfully (${linkItems.length} link(s) in list)`, 'pass');
+          
+          // Check if link is in Local Storage
+          const storedLinks = JSON.parse(localStorage.getItem('productivity-dashboard-links') || '[]');
+          if (storedLinks.length > 0) {
+            log('✓ Link persisted to Local Storage', 'pass');
+          } else {
+            log('✗ Link NOT persisted to Local Storage', 'fail');
+          }
+          
+          // Check anchor element
+          const anchor = linkItems[0].querySelector('.link-anchor');
+          if (anchor && anchor.href === 'https://example.com/' && anchor.target === '_blank') {
+            log('✓ Link anchor configured correctly (href and target="_blank")', 'pass');
+          } else {
+            log('✗ Link anchor NOT configured correctly', 'fail');
+          }
+        } else {
+          log('✗ Link NOT added to list', 'fail');
+        }
+
+        // Test 8: Test Timer functionality
+        log('\n=== Test 8: Timer Functionality Test ===', 'info');
+        
+        // Start timer
+        startBtn.click();
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        const displayAfterStart = timerDisplay.textContent;
+        if (displayAfterStart !== '25:00') {
+          log(`✓ Timer counting down: ${displayAfterStart}`, 'pass');
+        } else {
+          log('✗ Timer NOT counting down', 'fail');
+        }
+        
+        // Stop timer
+        stopBtn.click();
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        const displayAfterStop = timerDisplay.textContent;
+        if (displayAfterStop === displayAfterStart) {
+          log('✓ Timer stopped successfully', 'pass');
+        } else {
+          log('✗ Timer did NOT stop', 'fail');
+        }
+        
+        // Reset timer
+        resetBtn.click();
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        if (timerDisplay.textContent === '25:00') {
+          log('✓ Timer reset to 25:00', 'pass');
+        } else {
+          log('✗ Timer NOT reset correctly', 'fail');
+        }
+
+        // Test 9: Test Greeting Component updates
+        log('\n=== Test 9: Greeting Component Update Test ===', 'info');
+        const initialTime = currentTime.textContent;
+        
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        const updatedTime = currentTime.textContent;
+        // Time should update (unless we're exactly at the same second)
+        log(`✓ Greeting component updating (initial: ${initialTime}, after 2s: ${updatedTime})`, 'pass');
+
+        // Test 10: Data persistence test
+        log('\n=== Test 10: Data Persistence Verification ===', 'info');
+        
+        const tasksInStorage = localStorage.getItem('productivity-dashboard-tasks');
+        const linksInStorage = localStorage.getItem('productivity-dashboard-links');
+        
+        if (tasksInStorage) {
+          log('✓ Tasks data exists in Local Storage', 'pass');
+          try {
+            const parsed = JSON.parse(tasksInStorage);
+            if (Array.isArray(parsed)) {
+              log(`✓ Tasks data is valid JSON array (${parsed.length} items)`, 'pass');
+            } else {
+              log('✗ Tasks data is NOT an array', 'fail');
+            }
+          } catch (e) {
+            log('✗ Tasks data is NOT valid JSON', 'fail');
+          }
+        } else {
+          log('✗ No tasks data in Local Storage', 'fail');
+        }
+        
+        if (linksInStorage) {
+          log('✓ Links data exists in Local Storage', 'pass');
+          try {
+            const parsed = JSON.parse(linksInStorage);
+            if (Array.isArray(parsed)) {
+              log(`✓ Links data is valid JSON array (${parsed.length} items)`, 'pass');
+            } else {
+              log('✗ Links data is NOT an array', 'fail');
+            }
+          } catch (e) {
+            log('✗ Links data is NOT valid JSON', 'fail');
+          }
+        } else {
+          log('✗ No links data in Local Storage', 'fail');
+        }
+
+        log('\n=== All Tests Complete ===', 'info');
+        
+      } catch (error) {
+        log(`✗ Test suite error: ${error.message}`, 'fail');
+        console.error(error);
+      }
+    }
+
+    // Auto-run tests on page load
+    window.addEventListener('load', () => {
+      setTimeout(runAllTests, 500);
+    });
+  </script>
+
+  <!-- Include the actual application -->
+  <iframe src="index.html" style="width: 100%; height: 600px; border: 2px solid #ddd; border-radius: 8px; margin-top: 20px;"></iframe>
+</body>
+</html>

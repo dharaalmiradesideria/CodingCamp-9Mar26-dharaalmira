@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Final Verification Test - Productivity Dashboard</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f7fa;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-result {
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+    }
+    .pass {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .fail {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+    h1 { color: #333; }
+    h2 { color: #4a90e2; margin-top: 0; }
+    .summary {
+      font-size: 18px;
+      font-weight: bold;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 4px;
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Final Verification Test - Task 11</h1>
+  <div id="test-results"></div>
+
+  <script>
+    const results = [];
+
+    function addResult(category, test, passed, message) {
+      results.push({ category, test, passed, message });
+      displayResult(category, test, passed, message);
+    }
+
+    function displayResult(category, test, passed, message) {
+      const container = document.getElementById('test-results');
+      const resultDiv = document.createElement('div');
+      resultDiv.className = `test-result ${passed ? 'pass' : 'fail'}`;
+      resultDiv.innerHTML = `<strong>${category} - ${test}:</strong> ${message}`;
+      container.appendChild(resultDiv);
+    }
+
+    function displayWarning(message) {
+      const container = document.getElementById('test-results');
+      const resultDiv = document.createElement('div');
+      resultDiv.className = 'test-result warning';
+      resultDiv.innerHTML = `<strong>⚠️ WARNING:</strong> ${message}`;
+      container.appendChild(resultDiv);
+    }
+
+    function displaySummary() {
+      const container = document.getElementById('test-results');
+      const passed = results.filter(r => r.passed).length;
+      const failed = results.filter(r => !r.passed).length;
+      const total = results.length;
+      
+      const summaryDiv = document.createElement('div');
+      summaryDiv.className = `summary ${failed === 0 ? 'pass' : 'fail'}`;
+      summaryDiv.innerHTML = `
+        <h2>Test Summary</h2>
+        <p>Total Tests: ${total}</p>
+        <p>Passed: ${passed}</p>
+        <p>Failed: ${failed}</p>
+        <p>Success Rate: ${((passed/total)*100).toFixed(1)}%</p>
+      `;
+      container.appendChild(summaryDiv);
+    }
+
+    // Test 1: File Structure
+    function testFileStructure() {
+      const section = document.createElement('div');
+      section.className = 'test-section';
+      section.innerHTML = '<h2>1. File Structure Tests</h2>';
+      document.getElementById('test-results').appendChild(section);
+
+      // Check if CSS is loaded
+      const cssLoaded = document.styleSheets.length > 0;
+      addResult('File Structure', 'CSS File Loaded', cssLoaded, 
+        cssLoaded ? 'CSS file is loaded' : 'CSS file not found');
+
+      // Check if main sections exist
+      const sections = ['greeting-section', 'timer-section', 'tasks-section', 'links-section'];
+      sections.forEach(id => {
+        const exists = document.getElementById(id) !== null;
+        addResult('File Structure', `Section #${id}`, exists,
+          exists ? `Section exists` : `Section missing`);
+      });
+    }
+
+    // Test 2: Greeting Component
+    function testGreetingComponent() {
+      const section = document.createElement('div');
+      section.className = 'test-section';
+      section.innerHTML = '<h2>2. Greeting Component Tests</h2>';
+      document.getElementById('test-results').appendChild(section);
+
+      const greetingSection = document.getElementById('greeting-section');
+      
+      // Check if greeting elements exist
+      const greetingMsg = greetingSection?.querySelector('.greeting-message');
+      const currentTime = greetingSection?.querySelector('.current-time');
+      const currentDate = greetingSection?.querySelector('.current-date');
+
+      addResult('Greeting', 'Greeting Message Element', !!greetingMsg,
+        greetingMsg ? `Found: "${greetingMsg.textContent}"` : 'Element not found');
+      
+      addResult('Greeting', 'Current Time Element', !!currentTime,
+        currentTime ? `Found: "${currentTime.textContent}"` : 'Element not found');
+      
+      addResult('Greeting', 'Current Date Element', !!currentDate,
+        currentDate ? `Found: "${currentDate.textContent}"` : 'Element not found');
+
+      // Check if greeting is appropriate for current time
+      if (greetingMsg) {
+        const hour = new Date().getHours();
+        let expectedGreeting;
+        if (hour >= 5 && hour < 12) expectedGreeting = 'Good morning';
+        else if (hour >= 12 && hour < 17) expectedGreeting = 'Good afternoon';
+        else if (hour >= 17 && hour < 21) expectedGreeting = 'Good evening';
+        else expectedGreeting = 'Good night';
+
+        const correct = greetingMsg.textContent === expectedGreeting;
+        addResult('Greeting', 'Time-based Greeting', correct,
+          correct ? `Correct: "${expectedGreeting}"` : `Expected "${expectedGreeting}", got "${greetingMsg.textContent}"`);
+      }
+    }
+
+    // Test 3: Focus Timer Component
+    function testFocusTimerComponent() {
+      const section = document.createElement('div');
+      section.className = 'test-section';
+      section.innerHTML = '<h2>3. Focus Timer Component Tests</h2>';
+      document.getElementById('test-results').appendChild(section);
+
+      const timerSection = document.getElementById('timer-section');
+      
+      // Check if timer elements exist
+      const timerDisplay = timerSection?.querySelector('.timer-display');
+      const startBtn = document.getElementById('timer-start');
+      const stopBtn = document.getElementById('timer-stop');
+      const resetBtn = document.getElementById('timer-reset');
+
+      addResult('Timer', 'Timer Display Element', !!timerDisplay,
+        timerDisplay ? `Found: "${timerDisplay.textContent}"` : 'Element not found');
+      
+      addResult('Timer', 'Start Button', !!startBtn,
+        startBtn ? 'Button exists' : 'Button not found');
+      
+      addResult('Timer', 'Stop Button', !!stopBtn,
+        stopBtn ? 'Button exists' : 'Button not found');
+      
+      addResult('Timer', 'Reset Button', !!resetBtn,
+        resetBtn ? 'Button exists' : 'Button not found');
+
+      // Check initial timer value
+      if (timerDisplay) {
+        const initialValue = timerDisplay.textContent.trim();
+        const is25Minutes = initialValue === '25:00';
+        addResult('Timer', 'Initial Value (25:00)', is25Minutes,
+          is25Minutes ? 'Correct initial value' : `Expected "25:00", got "${initialValue}"`);
+      }
+
+      // Test if timer functionality is implemented
+      if (startBtn) {
+        const hasClickHandler = startBtn.onclick !== null || 
+                               startBtn.getAttribute('onclick') !== null;
+        
+        // Try to check if event listeners are attached (this is a basic check)
+        displayWarning('Timer functionality needs manual testing: Click Start, verify countdown, test Stop and Reset buttons');
+      }
+    }
+
+    // Test 4: Task List Component
+    function testTaskListComponent() {
+      const section = document.createElement('div');
+      section.className = 'test-section';
+      section.innerHTML = '<h2>4. Task List Component Tests</h2>';
+      document.getElementById('test-results').appendChild(section);
+
+      const tasksSection = document.getElementById('tasks-section');
+      
+      // Check if task elements exist
+      const taskInput = document.getElementById('task-input');
+      const taskAddBtn = document.getElementById('task-add');
+      const taskList = tasksSection?.querySelector('.task-list');
+
+      addResult('Tasks', 'Task Input Element', !!taskInput,
+        taskInput ? 'Input exists' : 'Input not found');
+      
+      addResult('Tasks', 'Add Task Button', !!taskAddBtn,
+        taskAddBtn ? 'Button exists' : 'Button not found');
+      
+      addResult('Tasks', 'Task List Container', !!taskList,
+        taskList ? 'Container exists' : 'Container not found');
+
+      // Check Local Storage
+      try {
+        const storedTasks = localStorage.getItem('productivity-dashboard-tasks');
+        addResult('Tasks', 'Local Storage Access', true,
+          storedTasks ? `Found ${JSON.parse(storedTasks).length} stored tasks` : 'No tasks stored (empty list is OK)');
+      } catch (e) {
+        addResult('Tasks', 'Local Storage Access', false, `Error: ${e.message}`);
+      }
+
+      displayWarning('Task functionality needs manual testing: Add task, edit task, toggle completion, delete task');
+    }
+
+    // Test 5: Quick Links Component
+    function testQuickLinksComponent() {
+      const section = document.createElement('div');
+      section.className = 'test-section';
+      section.innerHTML = '<h2>5. Quick Links Component Tests</h2>';
+      document.getElementById('test-results').appendChild(section);
+
+      const linksSection = document.getElementById('links-section');
+      
+      // Check if link elements exist
+      const linkNameInput = document.getElementById('link-name');
+      const linkUrlInput = document.getElementById('link-url');
+      const linkAddBtn = document.getElementById('link-add');
+      const linkList = linksSection?.querySelector('.link-list');
+
+      addResult('Links', 'Link Name Input', !!linkNameInput,
+        linkNameInput ? 'Input exists' : 'Input not found');
+      
+      addResult('Links', 'Link URL Input', !!linkUrlInput,
+        linkUrlInput ? 'Input exists' : 'Input not found');
+      
+      addResult('Links', 'Add Link Button', !!linkAddBtn,
+        linkAddBtn ? 'Button exists' : 'Button not found');
+      
+      addResult('Links', 'Link List Container', !!linkList,
+        linkList ? 'Container exists' : 'Container not found');
+
+      // Check Local Storage
+      try {
+        const storedLinks = localStorage.getItem('productivity-dashboard-links');
+        addResult('Links', 'Local Storage Access', true,
+          storedLinks ? `Found ${JSON.parse(storedLinks).length} stored links` : 'No links stored (empty list is OK)');
+      } catch (e) {
+        addResult('Links', 'Local Storage Access', false, `Error: ${e.message}`);
+      }
+
+      displayWarning('Link functionality needs manual testing: Add link, edit link, delete link, click link (opens in new tab)');
+    }
+
+    // Test 6: Browser Compatibility
+    function testBrowserCompatibility() {
+      const section = document.createElement('div');
+      section.className = 'test-section';
+      section.innerHTML = '<h2>6. Browser Compatibility Tests</h2>';
+      document.getElementById('test-results').appendChild(section);
+
+      // Check ES6+ features
+      const features = {
+        'Arrow Functions': () => true,
+        'Template Literals': () => `test` === 'test',
+        'Const/Let': () => { const x = 1; let y = 2; return x + y === 3; },
+        'Classes': () => { class Test {} return new Test() instanceof Test; },
+        'Local Storage': () => typeof localStorage !== 'undefined',
+        'JSON': () => typeof JSON !== 'undefined',
+        'Array Methods': () => [1,2,3].map(x => x * 2).length === 3
+      };
+
+      Object.entries(features).forEach(([name, test]) => {
+        try {
+          const passed = test();
+          addResult('Browser', name, passed, passed ? 'Supported' : 'Not supported');
+        } catch (e) {
+          addResult('Browser', name, false, `Error: ${e.message}`);
+        }
+      });
+    }
+
+    // Test 7: Requirements Coverage
+    function testRequirementsCoverage() {
+      const section = document.createElement('div');
+      section.className = 'test-section';
+      section.innerHTML = '<h2>7. Requirements Coverage</h2>';
+      document.getElementById('test-results').appendChild(section);
+
+      const requirements = [
+        { id: 'R1', name: 'Display Current Time and Date', status: 'Implemented' },
+        { id: 'R2', name: 'Display Time-Based Greeting', status: 'Implemented' },
+        { id: 'R3', name: 'Provide Focus Timer', status: 'NOT IMPLEMENTED' },
+        { id: 'R4', name: 'Manage Tasks', status: 'Implemented' },
+        { id: 'R5', name: 'Persist Tasks in Local Storage', status: 'Implemented' },
+        { id: 'R6', name: 'Manage Quick Links', status: 'Implemented' },
+        { id: 'R7', name: 'Persist Quick Links in Local Storage', status: 'Implemented' },
+        { id: 'R8', name: 'Implement Single-File Architecture', status: 'Implemented' },
+        { id: 'R9', name: 'Support Modern Browsers', status: 'Implemented' },
+        { id: 'R10', name: 'Provide Responsive User Interface', status: 'Implemented' },
+        { id: 'R11', name: 'Provide Clear Visual Design', status: 'Implemented' }
+      ];
+
+      requirements.forEach(req => {
+        const implemented = req.status === 'Implemented';
+        addResult('Requirements', req.id, implemented, `${req.name}: ${req.status}`);
+      });
+    }
+
+    // Run all tests
+    function runAllTests() {
+      testFileStructure();
+      testGreetingComponent();
+      testFocusTimerComponent();
+      testTaskListComponent();
+      testQuickLinksComponent();
+      testBrowserCompatibility();
+      testRequirementsCoverage();
+      displaySummary();
+    }
+
+    // Wait for DOM to be ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', runAllTests);
+    } else {
+      runAllTests();
+    }
+  </script>
+</body>
+</html>

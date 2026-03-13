@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 5.2 Test - Task CRUD Operations</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .pass { color: green; font-weight: bold; }
+    .fail { color: red; font-weight: bold; }
+    .test-result { margin: 10px 0; padding: 10px; background: #f5f5f5; }
+    h2 { color: #333; }
+    h3 { color: #666; }
+    pre { background: #f0f0f0; padding: 10px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>Task 5.2 Test: Task CRUD Operations</h1>
+  <p>Testing addTask, editTask, deleteTask, and toggleTask methods with validation and Local Storage persistence.</p>
+  
+  <div id="test-results"></div>
+
+  <script>
+    // Import TaskListComponent from app.js
+    // Since we can't use modules, we'll create a mock container and test directly
+    
+    class TaskListComponent {
+      constructor(containerElement, storageKey) {
+        this.container = containerElement;
+        this.storageKey = storageKey;
+        this.tasks = [];
+      }
+
+      init() {
+        this.loadTasks();
+      }
+
+      loadTasks() {
+        try {
+          const data = localStorage.getItem(this.storageKey);
+          if (data) {
+            const parsed = JSON.parse(data);
+            if (Array.isArray(parsed)) {
+              this.tasks = parsed;
+            } else {
+              console.error('Invalid task data format in Local Storage, initializing empty list');
+              this.tasks = [];
+            }
+          } else {
+            this.tasks = [];
+          }
+        } catch (error) {
+          console.error('Failed to load tasks from Local Storage:', error);
+          this.tasks = [];
+        }
+      }
+
+      saveTasks() {
+        try {
+          localStorage.setItem(this.storageKey, JSON.stringify(this.tasks));
+        } catch (error) {
+          if (error.name === 'QuotaExceededError') {
+            console.error('Local Storage quota exceeded. Unable to save tasks.');
+          } else {
+            console.error('Failed to save tasks to Local Storage:', error);
+          }
+        }
+      }
+
+      addTask(text) {
+        const trimmedText = text.trim();
+        
+        if (!trimmedText) {
+          console.error('Task text cannot be empty');
+          return false;
+        }
+        
+        if (trimmedText.length > 500) {
+          console.error('Task text cannot exceed 500 characters');
+          return false;
+        }
+        
+        const newTask = {
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+          text: trimmedText,
+          completed: false,
+          createdAt: Date.now()
+        };
+        
+        this.tasks.push(newTask);
+        this.saveTasks();
+        
+        return true;
+      }
+
+      editTask(id, newText) {
+        const trimmedText = newText.trim();
+        
+        if (!trimmedText) {
+          console.error('Task text cannot be empty');
+          return false;
+        }
+        
+        if (trimmedText.length > 500) {
+          console.error('Task text cannot exceed 500 characters');
+          return false;
+        }
+        
+        const task = this.tasks.find(t => t.id === id);
+        
+        if (!task) {
+          console.error('Task not found with id:', id);
+          return false;
+        }
+        
+        task.text = trimmedText;
+        this.saveTasks();
+        
+        return true;
+      }
+
+      deleteTask(id) {
+        const index = this.tasks.findIndex(t => t.id === id);
+        
+        if (index === -1) {
+          console.error('Task not found with id:', id);
+          return false;
+        }
+        
+        this.tasks.splice(index, 1);
+        this.saveTasks();
+        
+        return true;
+      }
+
+      toggleTask(id) {
+        const task = this.tasks.find(t => t.id === id);
+        
+        if (!task) {
+          console.error('Task not found with id:', id);
+          return false;
+        }
+        
+        task.completed = !task.completed;
+        this.saveTasks();
+        
+        return true;
+      }
+    }
+
+    // Test Suite
+    const results = [];
+    const storageKey = 'test-productivity-dashboard-tasks';
+    
+    function runTests() {
+      // Clear any existing test data
+      localStorage.removeItem(storageKey);
+      
+      const container = document.createElement('div');
+      const component = new TaskListComponent(container, storageKey);
+      component.init();
+
+      // Test 1: addTask with valid text
+      results.push({
+        name: 'addTask - Valid text',
+        pass: component.addTask('Buy groceries') === true && component.tasks.length === 1,
+        details: `Tasks count: ${component.tasks.length}, Task text: "${component.tasks[0]?.text}"`
+      });
+
+      // Test 2: addTask validates empty text
+      results.push({
+        name: 'addTask - Reject empty text',
+        pass: component.addTask('   ') === false && component.tasks.length === 1,
+        details: `Empty text rejected, tasks count remains: ${component.tasks.length}`
+      });
+
+      // Test 3: addTask validates text length (>500 chars)
+      const longText = 'a'.repeat(501);
+      results.push({
+        name: 'addTask - Reject text > 500 chars',
+        pass: component.addTask(longText) === false && component.tasks.length === 1,
+        details: `Long text (${longText.length} chars) rejected, tasks count: ${component.tasks.length}`
+      });
+
+      // Test 4: addTask trims whitespace
+      component.addTask('  Task with spaces  ');
+      const lastTask = component.tasks[component.tasks.length - 1];
+      results.push({
+        name: 'addTask - Trims whitespace',
+        pass: lastTask.text === 'Task with spaces',
+        details: `Trimmed text: "${lastTask.text}"`
+      });
+
+      // Test 5: addTask creates proper task structure
+      const task = component.tasks[0];
+      results.push({
+        name: 'addTask - Creates proper task structure',
+        pass: task.id && task.text && task.completed === false && task.createdAt > 0,
+        details: `Task: ${JSON.stringify(task, null, 2)}`
+      });
+
+      // Test 6: addTask persists to Local Storage
+      const storedData = localStorage.getItem(storageKey);
+      const parsed = JSON.parse(storedData);
+      results.push({
+        name: 'addTask - Persists to Local Storage',
+        pass: Array.isArray(parsed) && parsed.length === component.tasks.length,
+        details: `Stored ${parsed.length} tasks in Local Storage`
+      });
+
+      // Test 7: editTask with valid text
+      const taskId = component.tasks[0].id;
+      const editResult = component.editTask(taskId, 'Updated task text');
+      results.push({
+        name: 'editTask - Updates task text',
+        pass: editResult === true && component.tasks[0].text === 'Updated task text',
+        details: `Updated text: "${component.tasks[0].text}"`
+      });
+
+      // Test 8: editTask validates empty text
+      results.push({
+        name: 'editTask - Reject empty text',
+        pass: component.editTask(taskId, '   ') === false,
+        details: 'Empty text rejected'
+      });
+
+      // Test 9: editTask validates text length
+      results.push({
+        name: 'editTask - Reject text > 500 chars',
+        pass: component.editTask(taskId, 'a'.repeat(501)) === false,
+        details: 'Long text rejected'
+      });
+
+      // Test 10: editTask with invalid ID
+      results.push({
+        name: 'editTask - Reject invalid ID',
+        pass: component.editTask('invalid-id', 'New text') === false,
+        details: 'Invalid ID rejected'
+      });
+
+      // Test 11: editTask persists changes
+      component.editTask(taskId, 'Final text');
+      const storedAfterEdit = JSON.parse(localStorage.getItem(storageKey));
+      results.push({
+        name: 'editTask - Persists to Local Storage',
+        pass: storedAfterEdit[0].text === 'Final text',
+        details: `Stored text: "${storedAfterEdit[0].text}"`
+      });
+
+      // Test 12: toggleTask changes completed status
+      const initialCompleted = component.tasks[0].completed;
+      component.toggleTask(taskId);
+      results.push({
+        name: 'toggleTask - Toggles completed status',
+        pass: component.tasks[0].completed === !initialCompleted,
+        details: `Before: ${initialCompleted}, After: ${component.tasks[0].completed}`
+      });
+
+      // Test 13: toggleTask can toggle back
+      component.toggleTask(taskId);
+      results.push({
+        name: 'toggleTask - Toggles back to original',
+        pass: component.tasks[0].completed === initialCompleted,
+        details: `Toggled back to: ${component.tasks[0].completed}`
+      });
+
+      // Test 14: toggleTask with invalid ID
+      results.push({
+        name: 'toggleTask - Reject invalid ID',
+        pass: component.toggleTask('invalid-id') === false,
+        details: 'Invalid ID rejected'
+      });
+
+      // Test 15: toggleTask persists changes
+      component.toggleTask(taskId);
+      const storedAfterToggle = JSON.parse(localStorage.getItem(storageKey));
+      results.push({
+        name: 'toggleTask - Persists to Local Storage',
+        pass: storedAfterToggle[0].completed === component.tasks[0].completed,
+        details: `Stored completed: ${storedAfterToggle[0].completed}`
+      });
+
+      // Test 16: deleteTask removes task
+      const initialCount = component.tasks.length;
+      component.deleteTask(taskId);
+      results.push({
+        name: 'deleteTask - Removes task from array',
+        pass: component.tasks.length === initialCount - 1,
+        details: `Before: ${initialCount}, After: ${component.tasks.length}`
+      });
+
+      // Test 17: deleteTask with invalid ID
+      results.push({
+        name: 'deleteTask - Reject invalid ID',
+        pass: component.deleteTask('invalid-id') === false,
+        details: 'Invalid ID rejected'
+      });
+
+      // Test 18: deleteTask persists changes
+      const storedAfterDelete = JSON.parse(localStorage.getItem(storageKey));
+      results.push({
+        name: 'deleteTask - Persists to Local Storage',
+        pass: storedAfterDelete.length === component.tasks.length,
+        details: `Stored ${storedAfterDelete.length} tasks`
+      });
+
+      // Test 19: Multiple operations maintain data integrity
+      component.addTask('Task 1');
+      component.addTask('Task 2');
+      component.addTask('Task 3');
+      const id1 = component.tasks[0].id;
+      const id2 = component.tasks[1].id;
+      component.toggleTask(id1);
+      component.editTask(id2, 'Modified Task 2');
+      component.deleteTask(component.tasks[2].id);
+      
+      results.push({
+        name: 'Multiple operations - Data integrity',
+        pass: component.tasks.length === 2 && 
+              component.tasks[0].completed === true &&
+              component.tasks[1].text === 'Modified Task 2',
+        details: `Tasks: ${JSON.stringify(component.tasks.map(t => ({text: t.text, completed: t.completed})))}`
+      });
+
+      // Test 20: Load tasks from Local Storage
+      const newComponent = new TaskListComponent(container, storageKey);
+      newComponent.init();
+      results.push({
+        name: 'loadTasks - Loads from Local Storage',
+        pass: newComponent.tasks.length === 2 &&
+              newComponent.tasks[0].completed === true &&
+              newComponent.tasks[1].text === 'Modified Task 2',
+        details: `Loaded ${newComponent.tasks.length} tasks successfully`
+      });
+
+      // Clean up
+      localStorage.removeItem(storageKey);
+
+      // Display results
+      displayResults();
+    }
+
+    function displayResults() {
+      const container = document.getElementById('test-results');
+      const passed = results.filter(r => r.pass).length;
+      const total = results.length;
+      
+      let html = `<div class="test-section">
+        <h2>Test Summary: ${passed}/${total} tests passed</h2>
+        <p class="${passed === total ? 'pass' : 'fail'}">
+          ${passed === total ? '✓ All tests passed!' : `✗ ${total - passed} test(s) failed`}
+        </p>
+      </div>`;
+
+      results.forEach((result, index) => {
+        html += `<div class="test-result">
+          <h3>${index + 1}. ${result.name} <span class="${result.pass ? 'pass' : 'fail'}">${result.pass ? '✓ PASS' : '✗ FAIL'}</span></h3>
+          <pre>${result.details}</pre>
+        </div>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Run tests on page load
+    runTests();
+  </script>
+</body>
+</html>

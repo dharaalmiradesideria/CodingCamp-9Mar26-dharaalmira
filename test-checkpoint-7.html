@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkpoint 7 - Task List & Quick Links Verification</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 3px solid #0066cc;
+      padding-bottom: 10px;
+    }
+    .test-section {
+      background: white;
+      margin: 20px 0;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-result {
+      margin: 8px 0;
+      padding: 12px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pass {
+      background-color: #d4edda;
+      color: #155724;
+      border-left: 4px solid #28a745;
+    }
+    .fail {
+      background-color: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid #dc3545;
+    }
+    .summary {
+      font-size: 1.2em;
+      font-weight: bold;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    .component-demo {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    button {
+      background: #0066cc;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      background: #0052a3;
+    }
+    .task-list, .link-list {
+      list-style: none;
+      padding: 0;
+      margin: 15px 0;
+    }
+    .task-item, .link-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      background: #fafafa;
+    }
+    .task-item.completed {
+      opacity: 0.6;
+    }
+    .task-item.completed .task-text {
+      text-decoration: line-through;
+      color: #666;
+    }
+    .task-text, .link-anchor {
+      flex: 1;
+    }
+    .link-anchor {
+      color: #0066cc;
+      text-decoration: none;
+    }
+    .link-anchor:hover {
+      text-decoration: underline;
+    }
+    input {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    .task-input-container, .link-input-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .task-input-container input {
+      flex: 1;
+    }
+    .link-input-container input {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <h1>✓ Checkpoint 7: Task List & Quick Links Component Verification</h1>
+  
+  <div class="test-section">
+    <h2>Automated Test Suite</h2>
+    <button onclick="runAllTests()">Run All Tests</button>
+    <div id="test-results"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Interactive Component Demo</h2>
+    <p>Test the components manually by adding, editing, and deleting tasks and links.</p>
+    <div class="component-demo">
+      <div id="tasks-section">
+        <h3>Tasks Component</h3>
+        <div class="task-input-container">
+          <input type="text" id="task-input" placeholder="Add a new task..." maxlength="500">
+          <button id="task-add">Add</button>
+        </div>
+        <ul class="task-list"></ul>
+      </div>
+
+      <div id="links-section">
+        <h3>Quick Links Component</h3>
+        <div class="link-input-container">
+          <input type="text" id="link-name" placeholder="Link name" maxlength="100">
+          <input type="url" id="link-url" placeholder="https://example.com">
+          <button id="link-add">Add</button>
+        </div>
+        <ul class="link-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    const results = [];
+    const taskStorageKey = 'test-checkpoint-7-tasks';
+    const linkStorageKey = 'test-checkpoint-7-links';
+
+    function logResult(name, pass, details) {
+      results.push({ name, pass, details });
+    }
+
+    function runAllTests() {
+      results.length = 0;
+      
+      // Clear test storage
+      localStorage.removeItem(taskStorageKey);
+      localStorage.removeItem(linkStorageKey);
+
+      // Create test containers
+      const taskContainer = document.createElement('div');
+      taskContainer.innerHTML = `
+        <div class="task-input-container">
+          <input type="text" id="task-input">
+          <button id="task-add">Add</button>
+        </div>
+        <ul class="task-list"></ul>
+      `;
+
+      const linkContainer = document.createElement('div');
+      linkContainer.innerHTML = `
+        <div class="link-input-container">
+          <input type="text" id="link-name">
+          <input type="url" id="link-url">
+          <button id="link-add">Add</button>
+        </div>
+        <ul class="link-list"></ul>
+      `;
+
+      // ===== TASK LIST COMPONENT TESTS =====
+      
+      const taskComponent = new TaskListComponent(taskContainer, taskStorageKey);
+      taskComponent.init();
+
+      // Test 1: TaskList - Add task
+      const addResult = taskComponent.addTask('Test task 1');
+      logResult('TaskList: Add valid task', addResult && taskComponent.tasks.length === 1, 
+        `Added: ${addResult}, Count: ${taskComponent.tasks.length}`);
+
+      // Test 2: TaskList - Validate empty text
+      const emptyResult = taskComponent.addTask('   ');
+      logResult('TaskList: Reject empty task', !emptyResult && taskComponent.tasks.length === 1,
+        `Rejected: ${!emptyResult}, Count: ${taskComponent.tasks.length}`);
+
+      // Test 3: TaskList - Validate max length
+      const longText = 'a'.repeat(501);
+      const longResult = taskComponent.addTask(longText);
+      logResult('TaskList: Reject task > 500 chars', !longResult && taskComponent.tasks.length === 1,
+        `Rejected: ${!longResult}, Count: ${taskComponent.tasks.length}`);
+
+      // Test 4: TaskList - Edit task
+      const taskId = taskComponent.tasks[0].id;
+      const editResult = taskComponent.editTask(taskId, 'Updated task');
+      logResult('TaskList: Edit task', editResult && taskComponent.tasks[0].text === 'Updated task',
+        `Edited: ${editResult}, Text: "${taskComponent.tasks[0].text}"`);
+
+      // Test 5: TaskList - Toggle task
+      const toggleResult = taskComponent.toggleTask(taskId);
+      logResult('TaskList: Toggle task completion', toggleResult && taskComponent.tasks[0].completed === true,
+        `Toggled: ${toggleResult}, Completed: ${taskComponent.tasks[0].completed}`);
+
+      // Test 6: TaskList - Render creates DOM elements
+      const taskItems = taskContainer.querySelectorAll('.task-item');
+      logResult('TaskList: Render creates DOM elements', taskItems.length === 1,
+        `DOM items: ${taskItems.length}`);
+
+      // Test 7: TaskList - Completed styling applied
+      const hasCompletedClass = taskItems[0].classList.contains('completed');
+      logResult('TaskList: Completed styling applied', hasCompletedClass,
+        `Has "completed" class: ${hasCompletedClass}`);
+
+      // Test 8: TaskList - Delete task
+      const deleteResult = taskComponent.deleteTask(taskId);
+      logResult('TaskList: Delete task', deleteResult && taskComponent.tasks.length === 0,
+        `Deleted: ${deleteResult}, Count: ${taskComponent.tasks.length}`);
+
+      // Test 9: TaskList - Local Storage persistence
+      taskComponent.addTask('Persistent task');
+      const stored = localStorage.getItem(taskStorageKey);
+      const parsed = JSON.parse(stored);
+      logResult('TaskList: Persists to Local Storage', Array.isArray(parsed) && parsed.length === 1,
+        `Stored ${parsed.length} task(s)`);
+
+      // Test 10: TaskList - Load from storage
+      const newTaskComponent = new TaskListComponent(taskContainer, taskStorageKey);
+      newTaskComponent.init();
+      logResult('TaskList: Loads from Local Storage', newTaskComponent.tasks.length === 1,
+        `Loaded ${newTaskComponent.tasks.length} task(s)`);
+
+      // ===== QUICK LINKS COMPONENT TESTS =====
+
+      const linkComponent = new QuickLinksComponent(linkContainer, linkStorageKey);
+      linkComponent.init();
+
+      // Test 11: Links - Add link
+      const addLinkResult = linkComponent.addLink('GitHub', 'https://github.com');
+      logResult('Links: Add valid link', addLinkResult && linkComponent.links.length === 1,
+        `Added: ${addLinkResult}, Count: ${linkComponent.links.length}`);
+
+      // Test 12: Links - Validate empty name
+      const emptyNameResult = linkComponent.addLink('   ', 'https://example.com');
+      logResult('Links: Reject empty name', !emptyNameResult && linkComponent.links.length === 1,
+        `Rejected: ${!emptyNameResult}, Count: ${linkComponent.links.length}`);
+
+      // Test 13: Links - Validate name length
+      const longName = 'a'.repeat(101);
+      const longNameResult = linkComponent.addLink(longName, 'https://example.com');
+      logResult('Links: Reject name > 100 chars', !longNameResult && linkComponent.links.length === 1,
+        `Rejected: ${!longNameResult}, Count: ${linkComponent.links.length}`);
+
+      // Test 14: Links - Validate URL format
+      const invalidUrlResult = linkComponent.addLink('Example', 'www.example.com');
+      logResult('Links: Reject invalid URL', !invalidUrlResult && linkComponent.links.length === 1,
+        `Rejected: ${!invalidUrlResult}, Count: ${linkComponent.links.length}`);
+
+      // Test 15: Links - Edit link
+      const linkId = linkComponent.links[0].id;
+      const editLinkResult = linkComponent.editLink(linkId, 'GitLab', 'https://gitlab.com');
+      logResult('Links: Edit link', editLinkResult && linkComponent.links[0].name === 'GitLab',
+        `Edited: ${editLinkResult}, Name: "${linkComponent.links[0].name}"`);
+
+      // Test 16: Links - Render creates DOM elements
+      const linkItems = linkContainer.querySelectorAll('.link-item');
+      logResult('Links: Render creates DOM elements', linkItems.length === 1,
+        `DOM items: ${linkItems.length}`);
+
+      // Test 17: Links - Anchor has target="_blank"
+      const anchor = linkItems[0].querySelector('.link-anchor');
+      logResult('Links: Anchor opens in new tab', anchor && anchor.target === '_blank',
+        `target="${anchor?.target}"`);
+
+      // Test 18: Links - Anchor has security attributes
+      logResult('Links: Anchor has security rel attribute', anchor && anchor.rel === 'noopener noreferrer',
+        `rel="${anchor?.rel}"`);
+
+      // Test 19: Links - Delete link
+      const deleteLinkResult = linkComponent.deleteLink(linkId);
+      logResult('Links: Delete link', deleteLinkResult && linkComponent.links.length === 0,
+        `Deleted: ${deleteLinkResult}, Count: ${linkComponent.links.length}`);
+
+      // Test 20: Links - Local Storage persistence
+      linkComponent.addLink('Test Link', 'https://test.com');
+      const storedLinks = localStorage.getItem(linkStorageKey);
+      const parsedLinks = JSON.parse(storedLinks);
+      logResult('Links: Persists to Local Storage', Array.isArray(parsedLinks) && parsedLinks.length === 1,
+        `Stored ${parsedLinks.length} link(s)`);
+
+      // Test 21: Links - Load from storage
+      const newLinkComponent = new QuickLinksComponent(linkContainer, linkStorageKey);
+      newLinkComponent.init();
+      logResult('Links: Loads from Local Storage', newLinkComponent.links.length === 1,
+        `Loaded ${newLinkComponent.links.length} link(s)`);
+
+      // Clean up
+      localStorage.removeItem(taskStorageKey);
+      localStorage.removeItem(linkStorageKey);
+
+      // Display results
+      displayResults();
+    }
+
+    function displayResults() {
+      const container = document.getElementById('test-results');
+      const passed = results.filter(r => r.pass).length;
+      const total = results.length;
+      
+      let html = `<div class="summary ${passed === total ? 'pass' : 'fail'}">
+        ${passed === total ? '✓' : '✗'} Test Results: ${passed}/${total} tests passed
+      </div>`;
+
+      results.forEach((result, index) => {
+        html += `<div class="test-result ${result.pass ? 'pass' : 'fail'}">
+          <strong>${result.pass ? '✓' : '✗'}</strong>
+          <div>
+            <strong>${index + 1}. ${result.name}</strong>
+            <div style="font-size: 0.9em; margin-top: 4px;">${result.details}</div>
+          </div>
+        </div>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Initialize interactive demo
+    document.addEventListener('DOMContentLoaded', () => {
+      const taskSection = document.getElementById('tasks-section');
+      const linkSection = document.getElementById('links-section');
+
+      const taskDemo = new TaskListComponent(taskSection, 'demo-tasks');
+      taskDemo.init();
+
+      const linkDemo = new QuickLinksComponent(linkSection, 'demo-links');
+      linkDemo.init();
+    });
+  </script>
+</body>
+</html>

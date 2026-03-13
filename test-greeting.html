@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Greeting Component Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    #greeting-section {
+      border: 1px solid #ccc;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    .greeting-message {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .current-time {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+    .current-date {
+      font-size: 20px;
+      color: #666;
+    }
+    .test-results {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f0f0f0;
+      border-radius: 8px;
+    }
+    .test-case {
+      margin: 10px 0;
+      padding: 10px;
+      background: white;
+      border-radius: 4px;
+    }
+    .pass { color: green; font-weight: bold; }
+    .fail { color: red; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>Greeting Component Test</h1>
+  
+  <section id="greeting-section" class="component-section">
+    <div class="greeting-message"></div>
+    <div class="current-time"></div>
+    <div class="current-date"></div>
+  </section>
+
+  <div class="test-results">
+    <h2>Test Results</h2>
+    <div id="test-output"></div>
+  </div>
+
+  <script>
+    // Copy the GreetingComponent class from app.js
+    class GreetingComponent {
+      constructor(containerElement) {
+        this.container = containerElement;
+        this.intervalId = null;
+      }
+
+      init() {
+        this.updateDisplay();
+        this.intervalId = setInterval(() => this.updateDisplay(), 1000);
+      }
+
+      updateDisplay() {
+        const now = new Date();
+        const hour = now.getHours();
+        
+        const greetingElement = this.container.querySelector('.greeting-message');
+        const timeElement = this.container.querySelector('.current-time');
+        const dateElement = this.container.querySelector('.current-date');
+        
+        if (greetingElement) {
+          greetingElement.textContent = this.getGreeting(hour);
+        }
+        if (timeElement) {
+          timeElement.textContent = this.formatTime(now);
+        }
+        if (dateElement) {
+          dateElement.textContent = this.formatDate(now);
+        }
+      }
+
+      getGreeting(hour) {
+        if (hour >= 5 && hour < 12) {
+          return 'Good morning';
+        } else if (hour >= 12 && hour < 17) {
+          return 'Good afternoon';
+        } else if (hour >= 17 && hour < 21) {
+          return 'Good evening';
+        } else {
+          return 'Good night';
+        }
+      }
+
+      formatTime(date) {
+        let hours = date.getHours();
+        const minutes = date.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        
+        hours = hours % 12;
+        hours = hours ? hours : 12;
+        
+        const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+        
+        return `${hours}:${minutesStr} ${ampm}`;
+      }
+
+      formatDate(date) {
+        const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+        
+        const dayOfWeek = daysOfWeek[date.getDay()];
+        const month = months[date.getMonth()];
+        const day = date.getDate();
+        
+        return `${dayOfWeek}, ${month} ${day}`;
+      }
+
+      destroy() {
+        if (this.intervalId) {
+          clearInterval(this.intervalId);
+        }
+      }
+    }
+
+    // Run tests
+    function runTests() {
+      const output = document.getElementById('test-output');
+      const results = [];
+
+      // Test 1: Greeting logic for different hours
+      const testGreeting = (hour, expected) => {
+        const component = new GreetingComponent(document.getElementById('greeting-section'));
+        const result = component.getGreeting(hour);
+        const pass = result === expected;
+        results.push(`<div class="test-case"><span class="${pass ? 'pass' : 'fail'}">${pass ? 'PASS' : 'FAIL'}</span>: getGreeting(${hour}) = "${result}" (expected "${expected}")</div>`);
+      };
+
+      testGreeting(5, 'Good morning');
+      testGreeting(11, 'Good morning');
+      testGreeting(12, 'Good afternoon');
+      testGreeting(16, 'Good afternoon');
+      testGreeting(17, 'Good evening');
+      testGreeting(20, 'Good evening');
+      testGreeting(21, 'Good night');
+      testGreeting(4, 'Good night');
+
+      // Test 2: Time formatting
+      const testTime = (hours, minutes, expected) => {
+        const component = new GreetingComponent(document.getElementById('greeting-section'));
+        const date = new Date(2024, 0, 1, hours, minutes);
+        const result = component.formatTime(date);
+        const pass = result === expected;
+        results.push(`<div class="test-case"><span class="${pass ? 'pass' : 'fail'}">${pass ? 'PASS' : 'FAIL'}</span>: formatTime(${hours}:${minutes}) = "${result}" (expected "${expected}")</div>`);
+      };
+
+      testTime(0, 0, '12:00 AM');
+      testTime(1, 30, '1:30 AM');
+      testTime(12, 0, '12:00 PM');
+      testTime(13, 45, '1:45 PM');
+      testTime(23, 59, '11:59 PM');
+
+      // Test 3: Date formatting
+      const component = new GreetingComponent(document.getElementById('greeting-section'));
+      const testDate = new Date(2024, 0, 15); // Monday, January 15, 2024
+      const dateResult = component.formatDate(testDate);
+      const datePass = dateResult === 'Monday, January 15';
+      results.push(`<div class="test-case"><span class="${datePass ? 'pass' : 'fail'}">${datePass ? 'PASS' : 'FAIL'}</span>: formatDate() = "${dateResult}" (expected "Monday, January 15")</div>`);
+
+      output.innerHTML = results.join('');
+    }
+
+    // Initialize component
+    document.addEventListener('DOMContentLoaded', () => {
+      const greetingContainer = document.getElementById('greeting-section');
+      const greeting = new GreetingComponent(greetingContainer);
+      greeting.init();
+
+      // Run tests after a short delay
+      setTimeout(runTests, 100);
+    });
+  </script>
+</body>
+</html>

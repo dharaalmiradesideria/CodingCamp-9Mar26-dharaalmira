@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 6.3 Test - Link Rendering and Navigation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .test-result {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 3px;
+    }
+    .pass {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .fail {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .link-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px;
+      margin: 5px 0;
+      background: #f5f5f5;
+      border-radius: 3px;
+    }
+    .link-anchor {
+      flex: 1;
+      color: #0066cc;
+      text-decoration: none;
+    }
+    .link-anchor:hover {
+      text-decoration: underline;
+    }
+    button {
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .link-input-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .link-input-container input {
+      flex: 1;
+      padding: 8px;
+    }
+    #links-section {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Task 6.3 Test: Link Rendering and Navigation</h1>
+  
+  <div class="test-section">
+    <h2>Automated Tests</h2>
+    <div id="test-results"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>Interactive Test</h2>
+    <div id="links-section">
+      <h3>Quick Links</h3>
+      <div class="link-input-container">
+        <input type="text" id="link-name" placeholder="Link name" maxlength="100">
+        <input type="url" id="link-url" placeholder="https://example.com">
+        <button id="link-add">Add</button>
+      </div>
+      <ul class="link-list"></ul>
+    </div>
+  </div>
+
+  <script>
+    // QuickLinksComponent implementation
+    class QuickLinksComponent {
+      constructor(containerElement, storageKey) {
+        this.container = containerElement;
+        this.storageKey = storageKey;
+        this.links = [];
+      }
+
+      init() {
+        this.loadLinks();
+        this.setupEventListeners();
+        this.render();
+      }
+
+      setupEventListeners() {
+        const nameInput = this.container.querySelector('#link-name');
+        const urlInput = this.container.querySelector('#link-url');
+        const addButton = this.container.querySelector('#link-add');
+
+        if (!nameInput || !urlInput || !addButton) {
+          console.error('Link input elements not found');
+          return;
+        }
+
+        addButton.addEventListener('click', () => {
+          const name = nameInput.value;
+          const url = urlInput.value;
+
+          if (this.addLink(name, url)) {
+            nameInput.value = '';
+            urlInput.value = '';
+          }
+        });
+
+        nameInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            urlInput.focus();
+          }
+        });
+
+        urlInput.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            const name = nameInput.value;
+            const url = urlInput.value;
+
+            if (this.addLink(name, url)) {
+              nameInput.value = '';
+              urlInput.value = '';
+              nameInput.focus();
+            }
+          }
+        });
+      }
+
+      loadLinks() {
+        try {
+          const data = localStorage.getItem(this.storageKey);
+          if (data) {
+            const parsed = JSON.parse(data);
+            if (Array.isArray(parsed)) {
+              this.links = parsed;
+            } else {
+              console.error('Invalid links data format in Local Storage, initializing empty list');
+              this.links = [];
+            }
+          } else {
+            this.links = [];
+          }
+        } catch (error) {
+          console.error('Failed to load links from Local Storage:', error);
+          this.links = [];
+        }
+      }
+
+      saveLinks() {
+        try {
+          localStorage.setItem(this.storageKey, JSON.stringify(this.links));
+        } catch (error) {
+          if (error.name === 'QuotaExceededError') {
+            console.error('Local Storage quota exceeded. Unable to save links.');
+            alert('Storage limit reached. Please delete some links to free up space.');
+          } else {
+            console.error('Failed to save links to Local Storage:', error);
+          }
+        }
+      }
+
+      addLink(name, url) {
+        const trimmedName = name.trim();
+        if (!trimmedName || trimmedName.length === 0) {
+          console.error('Link name cannot be empty');
+          return false;
+        }
+        if (trimmedName.length > 100) {
+          console.error('Link name cannot exceed 100 characters');
+          return false;
+        }
+
+        const trimmedUrl = url.trim();
+        if (!trimmedUrl.startsWith('http://') && !trimmedUrl.startsWith('https://')) {
+          console.error('URL must start with http:// or https://');
+          return false;
+        }
+
+        const newLink = {
+          id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
+          name: trimmedName,
+          url: trimmedUrl,
+          createdAt: Date.now()
+        };
+
+        this.links.push(newLink);
+        this.saveLinks();
+        this.render();
+
+        return true;
+      }
+
+      editLink(id, newName, newUrl) {
+        const linkIndex = this.links.findIndex(link => link.id === id);
+        if (linkIndex === -1) {
+          console.error('Link not found with id:', id);
+          return false;
+        }
+
+        const trimmedName = newName.trim();
+        if (!trimmedName || trimmedName.length === 0) {
+          console.error('Link name cannot be empty');
+          return false;
+        }
+        if (trimmedName.length > 100) {
+          console.error('Link name cannot exceed 100 characters');
+          return false;
+        }
+
+        const trimmedUrl = newUrl.trim();
+        if (!trimmedUrl.startsWith('http://') && !trimmedUrl.startsWith('https://')) {
+          console.error('URL must start with http:// or https://');
+          return false;
+        }
+
+        this.links[linkIndex].name = trimmedName;
+        this.links[linkIndex].url = trimmedUrl;
+
+        this.saveLinks();
+        this.render();
+
+        return true;
+      }
+
+      deleteLink(id) {
+        const linkIndex = this.links.findIndex(link => link.id === id);
+        if (linkIndex === -1) {
+          console.error('Link not found with id:', id);
+          return false;
+        }
+
+        this.links.splice(linkIndex, 1);
+        this.saveLinks();
+        this.render();
+
+        return true;
+      }
+
+      render() {
+        const linkListContainer = this.container.querySelector('.link-list');
+        if (!linkListContainer) {
+          console.error('Link list container not found');
+          return;
+        }
+
+        linkListContainer.innerHTML = '';
+
+        this.links.forEach(link => {
+          const linkElement = this.renderLink(link);
+          linkListContainer.appendChild(linkElement);
+        });
+      }
+
+      renderLink(link) {
+        const li = document.createElement('li');
+        li.className = 'link-item';
+        li.setAttribute('data-link-id', link.id);
+
+        const anchor = document.createElement('a');
+        anchor.href = link.url;
+        anchor.target = '_blank';
+        anchor.rel = 'noopener noreferrer';
+        anchor.className = 'link-anchor';
+        anchor.textContent = link.name;
+
+        const editButton = document.createElement('button');
+        editButton.className = 'link-edit';
+        editButton.textContent = 'Edit';
+        editButton.addEventListener('click', () => {
+          const newName = prompt('Edit link name:', link.name);
+          if (newName !== null) {
+            const newUrl = prompt('Edit link URL:', link.url);
+            if (newUrl !== null) {
+              this.editLink(link.id, newName, newUrl);
+            }
+          }
+        });
+
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'link-delete';
+        deleteButton.textContent = 'Delete';
+        deleteButton.addEventListener('click', () => {
+          if (confirm(`Delete link "${link.name}"?`)) {
+            this.deleteLink(link.id);
+          }
+        });
+
+        li.appendChild(anchor);
+        li.appendChild(editButton);
+        li.appendChild(deleteButton);
+
+        return li;
+      }
+
+      destroy() {
+        // Cleanup if needed
+      }
+    }
+
+    // Test runner
+    function runTests() {
+      const results = [];
+      const testStorageKey = 'test-links-' + Date.now();
+
+      // Clear any existing test data
+      localStorage.removeItem(testStorageKey);
+
+      // Create test container
+      const testContainer = document.createElement('div');
+      testContainer.innerHTML = `
+        <div class="link-input-container">
+          <input type="text" id="test-link-name">
+          <input type="url" id="test-link-url">
+          <button id="test-link-add">Add</button>
+        </div>
+        <ul class="link-list"></ul>
+      `;
+
+      const component = new QuickLinksComponent(testContainer, testStorageKey);
+      component.init();
+
+      // Test 1: render() displays empty list initially
+      results.push({
+        name: 'render() displays empty list initially',
+        pass: testContainer.querySelector('.link-list').children.length === 0
+      });
+
+      // Test 2: render() displays links after adding
+      component.addLink('GitHub', 'https://github.com');
+      results.push({
+        name: 'render() displays links after adding',
+        pass: testContainer.querySelector('.link-list').children.length === 1
+      });
+
+      // Test 3: renderLink() creates list item with correct class
+      const linkItem = testContainer.querySelector('.link-item');
+      results.push({
+        name: 'renderLink() creates list item with correct class',
+        pass: linkItem !== null && linkItem.tagName === 'LI'
+      });
+
+      // Test 4: renderLink() creates anchor element
+      const anchor = linkItem.querySelector('.link-anchor');
+      results.push({
+        name: 'renderLink() creates anchor element',
+        pass: anchor !== null && anchor.tagName === 'A'
+      });
+
+      // Test 5: Anchor has target="_blank"
+      results.push({
+        name: 'Anchor has target="_blank" for new tab behavior',
+        pass: anchor.target === '_blank'
+      });
+
+      // Test 6: Anchor has rel="noopener noreferrer" for security
+      results.push({
+        name: 'Anchor has rel="noopener noreferrer" for security',
+        pass: anchor.rel === 'noopener noreferrer'
+      });
+
+      // Test 7: Anchor displays link name
+      results.push({
+        name: 'Anchor displays link name',
+        pass: anchor.textContent === 'GitHub'
+      });
+
+      // Test 8: Anchor has correct href
+      results.push({
+        name: 'Anchor has correct href',
+        pass: anchor.href === 'https://github.com/'
+      });
+
+      // Test 9: renderLink() creates edit button
+      const editButton = linkItem.querySelector('.link-edit');
+      results.push({
+        name: 'renderLink() creates edit button',
+        pass: editButton !== null && editButton.tagName === 'BUTTON'
+      });
+
+      // Test 10: renderLink() creates delete button
+      const deleteButton = linkItem.querySelector('.link-delete');
+      results.push({
+        name: 'renderLink() creates delete button',
+        pass: deleteButton !== null && deleteButton.tagName === 'BUTTON'
+      });
+
+      // Test 11: List item has data-link-id attribute
+      results.push({
+        name: 'List item has data-link-id attribute',
+        pass: linkItem.hasAttribute('data-link-id')
+      });
+
+      // Test 12: render() displays multiple links
+      component.addLink('Google', 'https://google.com');
+      component.addLink('Stack Overflow', 'https://stackoverflow.com');
+      results.push({
+        name: 'render() displays multiple links',
+        pass: testContainer.querySelector('.link-list').children.length === 3
+      });
+
+      // Test 13: render() updates after delete
+      const firstLinkId = component.links[0].id;
+      component.deleteLink(firstLinkId);
+      results.push({
+        name: 'render() updates after delete',
+        pass: testContainer.querySelector('.link-list').children.length === 2
+      });
+
+      // Test 14: render() updates after edit
+      const secondLinkId = component.links[0].id;
+      component.editLink(secondLinkId, 'Updated Name', 'https://updated.com');
+      const updatedAnchor = testContainer.querySelector('.link-anchor');
+      results.push({
+        name: 'render() updates after edit',
+        pass: updatedAnchor.textContent === 'Updated Name' && updatedAnchor.href === 'https://updated.com/'
+      });
+
+      // Test 15: render() clears previous content
+      component.links = [];
+      component.render();
+      results.push({
+        name: 'render() clears previous content when links array is empty',
+        pass: testContainer.querySelector('.link-list').children.length === 0
+      });
+
+      // Cleanup
+      localStorage.removeItem(testStorageKey);
+
+      // Display results
+      const resultsContainer = document.getElementById('test-results');
+      results.forEach(result => {
+        const div = document.createElement('div');
+        div.className = `test-result ${result.pass ? 'pass' : 'fail'}`;
+        div.textContent = `${result.pass ? '✓' : '✗'} ${result.name}`;
+        resultsContainer.appendChild(div);
+      });
+
+      // Summary
+      const passed = results.filter(r => r.pass).length;
+      const total = results.length;
+      const summary = document.createElement('div');
+      summary.className = `test-result ${passed === total ? 'pass' : 'fail'}`;
+      summary.textContent = `Summary: ${passed}/${total} tests passed`;
+      summary.style.fontWeight = 'bold';
+      summary.style.marginTop = '15px';
+      resultsContainer.appendChild(summary);
+    }
+
+    // Initialize interactive test
+    document.addEventListener('DOMContentLoaded', () => {
+      // Run automated tests
+      runTests();
+
+      // Initialize interactive component
+      const container = document.getElementById('links-section');
+      const component = new QuickLinksComponent(container, 'test-interactive-links');
+      component.init();
+    });
+  </script>
+</body>
+</html>

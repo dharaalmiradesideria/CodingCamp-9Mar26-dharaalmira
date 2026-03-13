@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timer Component Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .timer-display {
+      font-size: 48px;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Focus Timer Component Test</h1>
+  <div id="timer-section">
+    <div class="timer-display">25:00</div>
+    <div class="timer-controls">
+      <button id="timer-start">Start</button>
+      <button id="timer-stop">Stop</button>
+      <button id="timer-reset">Reset</button>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    // Test the FocusTimerComponent
+    const timerContainer = document.getElementById('timer-section');
+    const timer = new FocusTimerComponent(timerContainer);
+    timer.init();
+
+    // Test formatTime method
+    console.log('Testing formatTime:');
+    console.log('0 seconds:', timer.formatTime(0)); // Should be "00:00"
+    console.log('59 seconds:', timer.formatTime(59)); // Should be "00:59"
+    console.log('60 seconds:', timer.formatTime(60)); // Should be "01:00"
+    console.log('1500 seconds:', timer.formatTime(1500)); // Should be "25:00"
+    console.log('3599 seconds:', timer.formatTime(3599)); // Should be "59:59"
+
+    // Test initial state
+    console.log('\nInitial state:');
+    console.log('Total seconds:', timer.totalSeconds); // Should be 1500
+    console.log('Remaining seconds:', timer.remainingSeconds); // Should be 1500
+    console.log('Is running:', timer.isRunning); // Should be false
+
+    // Test render
+    console.log('\nTimer display should show: 25:00');
+  </script>
+</body>
+</html>

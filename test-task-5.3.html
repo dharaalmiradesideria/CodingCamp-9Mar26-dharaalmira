@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 5.3 Test - Task Rendering and UI Updates</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1000px;
+      margin: 20px auto;
+      padding: 20px;
+    }
+    .test-section {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+    .pass { color: green; font-weight: bold; }
+    .fail { color: red; font-weight: bold; }
+    .test-result { margin: 10px 0; padding: 10px; background: #f5f5f5; }
+    h2 { color: #333; }
+    h3 { color: #666; }
+    pre { background: #f0f0f0; padding: 10px; overflow-x: auto; }
+    
+    /* Component styles for visual testing */
+    .task-list {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
+    }
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      background: white;
+      transition: opacity 0.2s;
+    }
+    .task-item.completed {
+      opacity: 0.6;
+    }
+    .task-item.completed .task-text {
+      text-decoration: line-through;
+      color: #666;
+    }
+    .task-text {
+      flex: 1;
+    }
+    button {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Task 5.3 Test: Task Rendering and UI Updates</h1>
+  <p>Testing render(), renderTask(), completion styling, and event listeners.</p>
+  
+  <div id="test-results"></div>
+  
+  <div class="test-section">
+    <h2>Visual Test Container</h2>
+    <div id="test-container">
+      <ul class="task-list"></ul>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    // Test Suite
+    const results = [];
+    const storageKey = 'test-productivity-dashboard-tasks-5.3';
+    
+    function runTests() {
+      // Clear any existing test data
+      localStorage.removeItem(storageKey);
+      
+      const container = document.getElementById('test-container');
+      const component = new TaskListComponent(container, storageKey);
+      component.init();
+
+      // Test 1: render() creates task list items in DOM
+      component.addTask('First task');
+      component.addTask('Second task');
+      const taskItems = container.querySelectorAll('.task-item');
+      results.push({
+        name: 'render() - Creates task list items in DOM',
+        pass: taskItems.length === 2,
+        details: `Found ${taskItems.length} task items in DOM`
+      });
+
+      // Test 2: renderTask() creates proper DOM structure
+      const firstItem = taskItems[0];
+      const hasCheckbox = firstItem.querySelector('.task-checkbox') !== null;
+      const hasText = firstItem.querySelector('.task-text') !== null;
+      const hasEdit = firstItem.querySelector('.task-edit') !== null;
+      const hasDelete = firstItem.querySelector('.task-delete') !== null;
+      results.push({
+        name: 'renderTask() - Creates proper DOM structure',
+        pass: hasCheckbox && hasText && hasEdit && hasDelete,
+        details: `Checkbox: ${hasCheckbox}, Text: ${hasText}, Edit: ${hasEdit}, Delete: ${hasDelete}`
+      });
+
+      // Test 3: renderTask() sets data-task-id attribute
+      const taskId = component.tasks[0].id;
+      const hasDataAttr = firstItem.getAttribute('data-task-id') === taskId;
+      results.push({
+        name: 'renderTask() - Sets data-task-id attribute',
+        pass: hasDataAttr,
+        details: `data-task-id="${firstItem.getAttribute('data-task-id')}"`
+      });
+
+      // Test 4: renderTask() displays task text correctly
+      const textSpan = firstItem.querySelector('.task-text');
+      results.push({
+        name: 'renderTask() - Displays task text correctly',
+        pass: textSpan.textContent === 'First task',
+        details: `Text content: "${textSpan.textContent}"`
+      });
+
+      // Test 5: Checkbox reflects completion status (unchecked)
+      const checkbox = firstItem.querySelector('.task-checkbox');
+      results.push({
+        name: 'Checkbox - Reflects uncompleted status',
+        pass: checkbox.checked === false,
+        details: `Checkbox checked: ${checkbox.checked}`
+      });
+
+      // Test 6: Toggle task and verify completion styling applied
+      component.toggleTask(taskId);
+      const completedItem = container.querySelector(`[data-task-id="${taskId}"]`);
+      const hasCompletedClass = completedItem.classList.contains('completed');
+      results.push({
+        name: 'Completion styling - Applies "completed" class',
+        pass: hasCompletedClass,
+        details: `Has "completed" class: ${hasCompletedClass}`
+      });
+
+      // Test 7: Checkbox reflects completion status (checked)
+      const completedCheckbox = completedItem.querySelector('.task-checkbox');
+      results.push({
+        name: 'Checkbox - Reflects completed status',
+        pass: completedCheckbox.checked === true,
+        details: `Checkbox checked: ${completedCheckbox.checked}`
+      });
+
+      // Test 8: Checkbox change event triggers toggleTask
+      const secondTaskId = component.tasks[1].id;
+      const secondItem = container.querySelector(`[data-task-id="${secondTaskId}"]`);
+      const secondCheckbox = secondItem.querySelector('.task-checkbox');
+      
+      // Simulate checkbox click
+      secondCheckbox.click();
+      
+      const taskAfterToggle = component.tasks.find(t => t.id === secondTaskId);
+      results.push({
+        name: 'Event listener - Checkbox click toggles task',
+        pass: taskAfterToggle.completed === true,
+        details: `Task completed status: ${taskAfterToggle.completed}`
+      });
+
+      // Test 9: Delete button removes task from DOM
+      const initialItemCount = container.querySelectorAll('.task-item').length;
+      const deleteButton = secondItem.querySelector('.task-delete');
+      
+      // Mock confirm to return true
+      const originalConfirm = window.confirm;
+      window.confirm = () => true;
+      deleteButton.click();
+      window.confirm = originalConfirm;
+      
+      const itemCountAfterDelete = container.querySelectorAll('.task-item').length;
+      results.push({
+        name: 'Event listener - Delete button removes task',
+        pass: itemCountAfterDelete === initialItemCount - 1,
+        details: `Before: ${initialItemCount}, After: ${itemCountAfterDelete}`
+      });
+
+      // Test 10: Edit button updates task text in DOM
+      const remainingTaskId = component.tasks[0].id;
+      const remainingItem = container.querySelector(`[data-task-id="${remainingTaskId}"]`);
+      const editButton = remainingItem.querySelector('.task-edit');
+      
+      // Mock prompt to return new text
+      const originalPrompt = window.prompt;
+      window.prompt = () => 'Updated task text';
+      editButton.click();
+      window.prompt = originalPrompt;
+      
+      const updatedTextSpan = container.querySelector(`[data-task-id="${remainingTaskId}"] .task-text`);
+      results.push({
+        name: 'Event listener - Edit button updates task text',
+        pass: updatedTextSpan.textContent === 'Updated task text',
+        details: `Updated text: "${updatedTextSpan.textContent}"`
+      });
+
+      // Test 11: render() clears and re-renders all tasks
+      component.addTask('Third task');
+      component.addTask('Fourth task');
+      const finalItemCount = container.querySelectorAll('.task-item').length;
+      results.push({
+        name: 'render() - Clears and re-renders all tasks',
+        pass: finalItemCount === component.tasks.length,
+        details: `DOM items: ${finalItemCount}, Tasks array: ${component.tasks.length}`
+      });
+
+      // Test 12: Multiple completed tasks have proper styling
+      component.tasks.forEach(task => component.toggleTask(task.id));
+      const completedItems = container.querySelectorAll('.task-item.completed');
+      results.push({
+        name: 'Completion styling - Multiple completed tasks',
+        pass: completedItems.length === component.tasks.length,
+        details: `Completed items: ${completedItems.length}, Total tasks: ${component.tasks.length}`
+      });
+
+      // Test 13: Strikethrough applied to completed task text
+      const anyCompletedItem = completedItems[0];
+      const completedText = anyCompletedItem.querySelector('.task-text');
+      const computedStyle = window.getComputedStyle(completedText);
+      const hasStrikethrough = computedStyle.textDecoration.includes('line-through');
+      results.push({
+        name: 'Completion styling - Strikethrough on completed tasks',
+        pass: hasStrikethrough,
+        details: `Text decoration: ${computedStyle.textDecoration}`
+      });
+
+      // Test 14: Opacity applied to completed tasks
+      const completedItemStyle = window.getComputedStyle(anyCompletedItem);
+      const hasReducedOpacity = parseFloat(completedItemStyle.opacity) < 1;
+      results.push({
+        name: 'Completion styling - Reduced opacity on completed tasks',
+        pass: hasReducedOpacity,
+        details: `Opacity: ${completedItemStyle.opacity}`
+      });
+
+      // Test 15: Empty task list renders without errors
+      component.tasks.forEach(task => {
+        window.confirm = () => true;
+        component.deleteTask(task.id);
+      });
+      window.confirm = originalConfirm;
+      
+      const emptyListItems = container.querySelectorAll('.task-item');
+      results.push({
+        name: 'render() - Handles empty task list',
+        pass: emptyListItems.length === 0,
+        details: `Task items in empty list: ${emptyListItems.length}`
+      });
+
+      // Test 16: Re-rendering after page reload (persistence)
+      component.addTask('Persistent task 1');
+      component.addTask('Persistent task 2');
+      component.toggleTask(component.tasks[0].id);
+      
+      // Create new component instance to simulate page reload
+      const newComponent = new TaskListComponent(container, storageKey);
+      newComponent.init();
+      
+      const reloadedItems = container.querySelectorAll('.task-item');
+      const reloadedCompleted = container.querySelectorAll('.task-item.completed');
+      results.push({
+        name: 'render() - Renders persisted tasks after reload',
+        pass: reloadedItems.length === 2 && reloadedCompleted.length === 1,
+        details: `Total items: ${reloadedItems.length}, Completed: ${reloadedCompleted.length}`
+      });
+
+      // Clean up
+      localStorage.removeItem(storageKey);
+
+      // Display results
+      displayResults();
+    }
+
+    function displayResults() {
+      const container = document.getElementById('test-results');
+      const passed = results.filter(r => r.pass).length;
+      const total = results.length;
+      
+      let html = `<div class="test-section">
+        <h2>Test Summary: ${passed}/${total} tests passed</h2>
+        <p class="${passed === total ? 'pass' : 'fail'}">
+          ${passed === total ? '✓ All tests passed!' : `✗ ${total - passed} test(s) failed`}
+        </p>
+      </div>`;
+
+      results.forEach((result, index) => {
+        html += `<div class="test-result">
+          <h3>${index + 1}. ${result.name} <span class="${result.pass ? 'pass' : 'fail'}">${result.pass ? '✓ PASS' : '✗ FAIL'}</span></h3>
+          <pre>${result.details}</pre>
+        </div>`;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // Run tests on page load
+    runTests();
+  </script>
+</body>
+</html>

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Compatibility Test - Productivity Dashboard</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f7fa;
+    }
+    h1 {
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .browser-info {
+      background: white;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .test-section {
+      background: white;
+      padding: 15px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .test-section h2 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #4a90e2;
+    }
+    .test-result {
+      padding: 8px 12px;
+      margin: 5px 0;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    .pass {
+      background-color: #d4edda;
+      color: #155724;
+      border-left: 4px solid #28a745;
+    }
+    .fail {
+      background-color: #f8d7da;
+      color: #721c24;
+      border-left: 4px solid #dc3545;
+    }
+    .info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      border-left: 4px solid #17a2b8;
+    }
+    .summary {
+      background: #4a90e2;
+      color: white;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 20px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .warning {
+      background-color: #fff3cd;
+      color: #856404;
+      border-left: 4px solid #ffc107;
+    }
+  </style>
+</head>
+<body>
+  <h1>Browser Compatibility Test</h1>
+  <p>Testing ES6+ features and Local Storage API for Productivity Dashboard</p>
+  
+  <div class="browser-info" id="browser-info"></div>
+  <div id="test-results"></div>
+  <div class="summary" id="summary"></div>
+
+  <script>
+    // Test Results Container
+    const resultsContainer = document.getElementById('test-results');
+    const summaryContainer = document.getElementById('summary');
+    const browserInfoContainer = document.getElementById('browser-info');
+    
+    let totalTests = 0;
+    let passedTests = 0;
+    let failedTests = 0;
+
+    // Display Browser Information
+    function displayBrowserInfo() {
+      const userAgent = navigator.userAgent;
+      let browserName = 'Unknown';
+      let browserVersion = 'Unknown';
+
+      // Detect browser
+      if (userAgent.indexOf('Chrome') > -1 && userAgent.indexOf('Edg') === -1) {
+        browserName = 'Chrome';
+        browserVersion = userAgent.match(/Chrome\/(\d+)/)?.[1] || 'Unknown';
+      } else if (userAgent.indexOf('Firefox') > -1) {
+        browserName = 'Firefox';
+        browserVersion = userAgent.match(/Firefox\/(\d+)/)?.[1] || 'Unknown';
+      } else if (userAgent.indexOf('Edg') > -1) {
+        browserName = 'Edge';
+        browserVersion = userAgent.match(/Edg\/(\d+)/)?.[1] || 'Unknown';
+      } else if (userAgent.indexOf('Safari') > -1 && userAgent.indexOf('Chrome') === -1) {
+        browserName = 'Safari';
+        browserVersion = userAgent.match(/Version\/(\d+)/)?.[1] || 'Unknown';
+      }
+
+      browserInfoContainer.innerHTML = `
+        <strong>Browser:</strong> ${browserName} ${browserVersion}<br>
+        <strong>User Agent:</strong> ${userAgent}
+      `;
+    }
+
+    // Test Helper Functions
+    function createTestSection(title) {
+      const section = document.createElement('div');
+      section.className = 'test-section';
+      section.innerHTML = `<h2>${title}</h2>`;
+      resultsContainer.appendChild(section);
+      return section;
+    }
+
+    function logResult(section, testName, passed, message = '') {
+      totalTests++;
+      if (passed) {
+        passedTests++;
+      } else {
+        failedTests++;
+      }
+
+      const result = document.createElement('div');
+      result.className = `test-result ${passed ? 'pass' : 'fail'}`;
+      result.textContent = `${passed ? '✓' : '✗'} ${testName}${message ? ': ' + message : ''}`;
+      section.appendChild(result);
+    }
+
+    function logInfo(section, message) {
+      const result = document.createElement('div');
+      result.className = 'test-result info';
+      result.textContent = `ℹ ${message}`;
+      section.appendChild(result);
+    }
+
+    function logWarning(section, message) {
+      const result = document.createElement('div');
+      result.className = 'test-result warning';
+      result.textContent = `⚠ ${message}`;
+      section.appendChild(result);
+    }
+
+    // ES6+ Feature Tests
+    function testES6Features() {
+      const section = createTestSection('ES6+ Features');
+
+      // Test 1: Classes
+      try {
+        class TestClass {
+          constructor(value) {
+            this.value = value;
+          }
+          getValue() {
+            return this.value;
+          }
+        }
+        const instance = new TestClass(42);
+        logResult(section, 'ES6 Classes', instance.getValue() === 42);
+      } catch (e) {
+        logResult(section, 'ES6 Classes', false, e.message);
+      }
+
+      // Test 2: Arrow Functions
+      try {
+        const arrowFunc = (x) => x * 2;
+        logResult(section, 'Arrow Functions', arrowFunc(5) === 10);
+      } catch (e) {
+        logResult(section, 'Arrow Functions', false, e.message);
+      }
+
+      // Test 3: Template Literals
+      try {
+        const name = 'World';
+        const greeting = `Hello, ${name}!`;
+        logResult(section, 'Template Literals', greeting === 'Hello, World!');
+      } catch (e) {
+        logResult(section, 'Template Literals', false, e.message);
+      }
+
+      // Test 4: Const and Let
+      try {
+        const constValue = 10;
+        let letValue = 20;
+        letValue = 30;
+        logResult(section, 'Const and Let', constValue === 10 && letValue === 30);
+      } catch (e) {
+        logResult(section, 'Const and Let', false, e.message);
+      }
+
+      // Test 5: Destructuring
+      try {
+        const obj = { a: 1, b: 2 };
+        const { a, b } = obj;
+        logResult(section, 'Object Destructuring', a === 1 && b === 2);
+      } catch (e) {
+        logResult(section, 'Object Destructuring', false, e.message);
+      }
+
+      // Test 6: Spread Operator
+      try {
+        const arr1 = [1, 2, 3];
+        const arr2 = [...arr1, 4, 5];
+        logResult(section, 'Spread Operator', arr2.length === 5 && arr2[4] === 5);
+      } catch (e) {
+        logResult(section, 'Spread Operator', false, e.message);
+      }
+
+      // Test 7: Array Methods (find, findIndex)
+      try {
+        const arr = [1, 2, 3, 4, 5];
+        const found = arr.find(x => x > 3);
+        const foundIndex = arr.findIndex(x => x > 3);
+        logResult(section, 'Array.find/findIndex', found === 4 && foundIndex === 3);
+      } catch (e) {
+        logResult(section, 'Array.find/findIndex', false, e.message);
+      }
+
+      // Test 8: Array.forEach
+      try {
+        const arr = [1, 2, 3];
+        let sum = 0;
+        arr.forEach(x => sum += x);
+        logResult(section, 'Array.forEach', sum === 6);
+      } catch (e) {
+        logResult(section, 'Array.forEach', false, e.message);
+      }
+
+      // Test 9: Object.values
+      try {
+        const obj = { a: 1, b: 2, c: 3 };
+        const values = Object.values(obj);
+        logResult(section, 'Object.values', values.length === 3 && values[0] === 1);
+      } catch (e) {
+        logResult(section, 'Object.values', false, e.message);
+      }
+
+      // Test 10: Default Parameters
+      try {
+        function testFunc(x = 10) {
+          return x;
+        }
+        logResult(section, 'Default Parameters', testFunc() === 10 && testFunc(20) === 20);
+      } catch (e) {
+        logResult(section, 'Default Parameters', false, e.message);
+      }
+    }
+
+    // DOM API Tests
+    function testDOMAPIs() {
+      const section = createTestSection('DOM APIs');
+
+      // Test 1: querySelector
+      try {
+        const element = document.querySelector('body');
+        logResult(section, 'querySelector', element !== null);
+      } catch (e) {
+        logResult(section, 'querySelector', false, e.message);
+      }
+
+      // Test 2: querySelectorAll
+      try {
+        const elements = document.querySelectorAll('div');
+        logResult(section, 'querySelectorAll', elements !== null);
+      } catch (e) {
+        logResult(section, 'querySelectorAll', false, e.message);
+      }
+
+      // Test 3: addEventListener
+      try {
+        const testDiv = document.createElement('div');
+        let clicked = false;
+        testDiv.addEventListener('click', () => { clicked = true; });
+        testDiv.click();
+        logResult(section, 'addEventListener', clicked === true);
+      } catch (e) {
+        logResult(section, 'addEventListener', false, e.message);
+      }
+
+      // Test 4: classList
+      try {
+        const testDiv = document.createElement('div');
+        testDiv.classList.add('test-class');
+        logResult(section, 'classList.add', testDiv.classList.contains('test-class'));
+      } catch (e) {
+        logResult(section, 'classList', false, e.message);
+      }
+
+      // Test 5: setAttribute/getAttribute
+      try {
+        const testDiv = document.createElement('div');
+        testDiv.setAttribute('data-test', 'value');
+        logResult(section, 'setAttribute/getAttribute', testDiv.getAttribute('data-test') === 'value');
+      } catch (e) {
+        logResult(section, 'setAttribute/getAttribute', false, e.message);
+      }
+
+      // Test 6: createElement
+      try {
+        const newElement = document.createElement('span');
+        logResult(section, 'createElement', newElement.tagName === 'SPAN');
+      } catch (e) {
+        logResult(section, 'createElement', false, e.message);
+      }
+    }
+
+    // Local Storage Tests
+    function testLocalStorage() {
+      const section = createTestSection('Local Storage API');
+      const testKey = 'test-compatibility-key';
+
+      // Test 1: Local Storage Availability
+      try {
+        const available = typeof(Storage) !== 'undefined' && window.localStorage !== undefined;
+        logResult(section, 'Local Storage Available', available);
+        if (!available) {
+          logWarning(section, 'Local Storage is not available in this browser');
+          return;
+        }
+      } catch (e) {
+        logResult(section, 'Local Storage Available', false, e.message);
+        return;
+      }
+
+      // Test 2: setItem
+      try {
+        localStorage.setItem(testKey, 'test-value');
+        logResult(section, 'localStorage.setItem', true);
+      } catch (e) {
+        logResult(section, 'localStorage.setItem', false, e.message);
+      }
+
+      // Test 3: getItem
+      try {
+        const value = localStorage.getItem(testKey);
+        logResult(section, 'localStorage.getItem', value === 'test-value');
+      } catch (e) {
+        logResult(section, 'localStorage.getItem', false, e.message);
+      }
+
+      // Test 4: JSON Serialization
+      try {
+        const testObj = { id: '123', text: 'Test Task', completed: false };
+        localStorage.setItem(testKey + '-json', JSON.stringify(testObj));
+        const retrieved = JSON.parse(localStorage.getItem(testKey + '-json'));
+        logResult(section, 'JSON Serialization', retrieved.id === '123' && retrieved.text === 'Test Task');
+      } catch (e) {
+        logResult(section, 'JSON Serialization', false, e.message);
+      }
+
+      // Test 5: Array Storage
+      try {
+        const testArray = [
+          { id: '1', text: 'Task 1', completed: false },
+          { id: '2', text: 'Task 2', completed: true }
+        ];
+        localStorage.setItem(testKey + '-array', JSON.stringify(testArray));
+        const retrievedArray = JSON.parse(localStorage.getItem(testKey + '-array'));
+        logResult(section, 'Array Storage', Array.isArray(retrievedArray) && retrievedArray.length === 2);
+      } catch (e) {
+        logResult(section, 'Array Storage', false, e.message);
+      }
+
+      // Test 6: removeItem
+      try {
+        localStorage.removeItem(testKey);
+        const value = localStorage.getItem(testKey);
+        logResult(section, 'localStorage.removeItem', value === null);
+      } catch (e) {
+        logResult(section, 'localStorage.removeItem', false, e.message);
+      }
+
+      // Cleanup
+      try {
+        localStorage.removeItem(testKey + '-json');
+        localStorage.removeItem(testKey + '-array');
+      } catch (e) {
+        // Ignore cleanup errors
+      }
+    }
+
+    // Timer and Interval Tests
+    function testTimers() {
+      const section = createTestSection('Timers and Intervals');
+
+      // Test 1: setTimeout
+      try {
+        let timeoutExecuted = false;
+        setTimeout(() => { timeoutExecuted = true; }, 10);
+        setTimeout(() => {
+          logResult(section, 'setTimeout', timeoutExecuted === true);
+        }, 50);
+      } catch (e) {
+        logResult(section, 'setTimeout', false, e.message);
+      }
+
+      // Test 2: setInterval and clearInterval
+      try {
+        let count = 0;
+        const intervalId = setInterval(() => { count++; }, 10);
+        setTimeout(() => {
+          clearInterval(intervalId);
+          logResult(section, 'setInterval/clearInterval', count > 0);
+        }, 50);
+      } catch (e) {
+        logResult(section, 'setInterval/clearInterval', false, e.message);
+      }
+    }
+
+    // Date API Tests
+    function testDateAPI() {
+      const section = createTestSection('Date API');
+
+      // Test 1: Date Constructor
+      try {
+        const now = new Date();
+        logResult(section, 'Date Constructor', now instanceof Date);
+      } catch (e) {
+        logResult(section, 'Date Constructor', false, e.message);
+      }
+
+      // Test 2: Date Methods
+      try {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        const day = now.getDay();
+        logResult(section, 'Date Methods (getHours, getMinutes, getDay)', 
+          typeof hours === 'number' && typeof minutes === 'number' && typeof day === 'number');
+      } catch (e) {
+        logResult(section, 'Date Methods', false, e.message);
+      }
+
+      // Test 3: Date.now()
+      try {
+        const timestamp = Date.now();
+        logResult(section, 'Date.now()', typeof timestamp === 'number' && timestamp > 0);
+      } catch (e) {
+        logResult(section, 'Date.now()', false, e.message);
+      }
+    }
+
+    // String Methods Tests
+    function testStringMethods() {
+      const section = createTestSection('String Methods');
+
+      // Test 1: trim()
+      try {
+        const str = '  hello  ';
+        logResult(section, 'String.trim()', str.trim() === 'hello');
+      } catch (e) {
+        logResult(section, 'String.trim()', false, e.message);
+      }
+
+      // Test 2: startsWith()
+      try {
+        const str = 'https://example.com';
+        logResult(section, 'String.startsWith()', str.startsWith('https://'));
+      } catch (e) {
+        logResult(section, 'String.startsWith()', false, e.message);
+      }
+
+      // Test 3: includes()
+      try {
+        const str = 'Hello World';
+        logResult(section, 'String.includes()', str.includes('World'));
+      } catch (e) {
+        logResult(section, 'String.includes()', false, e.message);
+      }
+    }
+
+    // Run All Tests
+    function runAllTests() {
+      displayBrowserInfo();
+      
+      testES6Features();
+      testDOMAPIs();
+      testLocalStorage();
+      testTimers();
+      testDateAPI();
+      testStringMethods();
+
+      // Display Summary after a delay to allow async tests to complete
+      setTimeout(() => {
+        const passRate = ((passedTests / totalTests) * 100).toFixed(1);
+        summaryContainer.innerHTML = `
+          <strong>Test Summary:</strong><br>
+          Total Tests: ${totalTests} | 
+          Passed: ${passedTests} | 
+          Failed: ${failedTests} | 
+          Pass Rate: ${passRate}%
+        `;
+
+        if (failedTests === 0) {
+          summaryContainer.style.backgroundColor = '#28a745';
+        } else if (failedTests <= 3) {
+          summaryContainer.style.backgroundColor = '#ffc107';
+          summaryContainer.style.color = '#856404';
+        } else {
+          summaryContainer.style.backgroundColor = '#dc3545';
+        }
+      }, 100);
+    }
+
+    // Run tests when page loads
+    runAllTests();
+  </script>
+</body>
+</html>

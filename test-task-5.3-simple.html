@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 5.3 Simple Manual Test</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body {
+      padding: 20px;
+    }
+    .test-info {
+      background: #f0f8ff;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-left: 4px solid #4a90e2;
+    }
+    .test-info h2 {
+      margin-top: 0;
+    }
+    .test-info ul {
+      list-style: disc;
+      margin-left: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-info">
+    <h2>Task 5.3 Manual Test - Task Rendering and UI Updates</h2>
+    <p><strong>What to test:</strong></p>
+    <ul>
+      <li>Add tasks using the input field and "Add" button</li>
+      <li>Check/uncheck tasks to toggle completion status</li>
+      <li>Verify completed tasks show strikethrough and reduced opacity</li>
+      <li>Click "Edit" to modify task text</li>
+      <li>Click "Delete" to remove tasks</li>
+      <li>Reload the page to verify tasks persist</li>
+    </ul>
+    <p><strong>Expected behavior:</strong></p>
+    <ul>
+      <li>Tasks appear in a list with checkbox, text, Edit, and Delete buttons</li>
+      <li>Completed tasks have strikethrough text and reduced opacity</li>
+      <li>All changes save automatically to Local Storage</li>
+      <li>Event listeners work correctly for all interactions</li>
+    </ul>
+  </div>
+
+  <section id="tasks-section" class="component-section">
+    <h2>Tasks</h2>
+    <div class="task-input-container">
+      <input type="text" id="task-input" placeholder="Add a new task..." maxlength="500">
+      <button id="task-add">Add</button>
+    </div>
+    <ul class="task-list"></ul>
+  </section>
+
+  <script src="js/app.js"></script>
+  <script>
+    // Initialize only the TaskListComponent for testing
+    document.addEventListener('DOMContentLoaded', () => {
+      const tasksContainer = document.getElementById('tasks-section');
+      const taskComponent = new TaskListComponent(tasksContainer, 'test-task-5.3-simple');
+      taskComponent.init();
+      
+      console.log('TaskListComponent initialized for testing');
+      console.log('Try adding, editing, deleting, and toggling tasks!');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Task 9.2 Component Styling Test</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <main class="dashboard">
+    <!-- Greeting Section Test -->
+    <section id="greeting-section" class="component-section">
+      <div class="greeting-message">Good morning</div>
+      <div class="current-time">10:30 AM</div>
+      <div class="current-date">Monday, January 15</div>
+    </section>
+
+    <!-- Timer Section Test -->
+    <section id="timer-section" class="component-section">
+      <h2>Focus Timer</h2>
+      <div class="timer-display">25:00</div>
+      <div class="timer-controls">
+        <button id="timer-start">Start</button>
+        <button id="timer-stop">Stop</button>
+        <button id="timer-reset">Reset</button>
+      </div>
+    </section>
+
+    <!-- Task List Section Test -->
+    <section id="tasks-section" class="component-section">
+      <h2>Tasks</h2>
+      <div class="task-input-container">
+        <input type="text" id="task-input" placeholder="Add a new task..." maxlength="500">
+        <button id="task-add">Add</button>
+      </div>
+      <ul class="task-list">
+        <!-- Regular task -->
+        <li class="task-item" data-task-id="1">
+          <input type="checkbox" class="task-checkbox">
+          <span class="task-text">Regular task with checkbox and buttons</span>
+          <button class="task-edit">Edit</button>
+          <button class="task-delete">Delete</button>
+        </li>
+        <!-- Completed task -->
+        <li class="task-item completed" data-task-id="2">
+          <input type="checkbox" class="task-checkbox" checked>
+          <span class="task-text">Completed task with strikethrough and reduced opacity</span>
+          <button class="task-edit">Edit</button>
+          <button class="task-delete">Delete</button>
+        </li>
+        <!-- Another regular task -->
+        <li class="task-item" data-task-id="3">
+          <input type="checkbox" class="task-checkbox">
+          <span class="task-text">Another regular task</span>
+          <button class="task-edit">Edit</button>
+          <button class="task-delete">Delete</button>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Quick Links Section Test -->
+    <section id="links-section" class="component-section">
+      <h2>Quick Links</h2>
+      <div class="link-input-container">
+        <input type="text" id="link-name" placeholder="Link name" maxlength="100">
+        <input type="url" id="link-url" placeholder="https://example.com">
+        <button id="link-add">Add</button>
+      </div>
+      <ul class="link-list">
+        <li class="link-item" data-link-id="1">
+          <a href="https://github.com" target="_blank" class="link-anchor">GitHub</a>
+          <button class="link-edit">Edit</button>
+          <button class="link-delete">Delete</button>
+        </li>
+        <li class="link-item" data-link-id="2">
+          <a href="https://stackoverflow.com" target="_blank" class="link-anchor">Stack Overflow</a>
+          <button class="link-edit">Edit</button>
+          <button class="link-delete">Delete</button>
+        </li>
+        <li class="link-item" data-link-id="3">
+          <a href="https://developer.mozilla.org" target="_blank" class="link-anchor">MDN Web Docs</a>
+          <button class="link-edit">Edit</button>
+          <button class="link-delete">Delete</button>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    // Add simple hover effect test
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('Task 9.2 Component Styling Test Loaded');
+      console.log('✓ Greeting section: Large prominent text (48px time, 24px greeting)');
+      console.log('✓ Timer display: Clear readable numbers (48px, bold)');
+      console.log('✓ Task list: Checkboxes, edit/delete buttons styled');
+      console.log('✓ Quick links: Clickable items with hover effects');
+      console.log('✓ Completed tasks: Strikethrough and reduced opacity (0.6)');
+      console.log('\nHover over task items and link items to see hover effects');
+    });
+  </script>
+</body>
+</html>

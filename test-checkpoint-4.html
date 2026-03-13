@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkpoint 4 - Greeting & Timer Verification</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .component-section {
+      border: 2px solid #ccc;
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 8px;
+    }
+    .greeting-message {
+      font-size: 32px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .current-time {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+    .current-date {
+      font-size: 20px;
+      color: #666;
+    }
+    .timer-display {
+      font-size: 48px;
+      font-weight: bold;
+      margin: 20px 0;
+      text-align: center;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 5px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .timer-controls {
+      text-align: center;
+    }
+    .test-results {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f0f0f0;
+      border-radius: 8px;
+    }
+    .test-case {
+      margin: 10px 0;
+      padding: 10px;
+      background: white;
+      border-radius: 4px;
+    }
+    .pass { color: green; font-weight: bold; }
+    .fail { color: red; font-weight: bold; }
+    h2 { margin-top: 0; }
+  </style>
+</head>
+<body>
+  <h1>Checkpoint 4: Greeting & Timer Component Verification</h1>
+  
+  <section id="greeting-section" class="component-section">
+    <h2>Greeting Component</h2>
+    <div class="greeting-message"></div>
+    <div class="current-time"></div>
+    <div class="current-date"></div>
+  </section>
+
+  <section id="timer-section" class="component-section">
+    <h2>Focus Timer Component</h2>
+    <div class="timer-display">25:00</div>
+    <div class="timer-controls">
+      <button id="timer-start">Start</button>
+      <button id="timer-stop">Stop</button>
+      <button id="timer-reset">Reset</button>
+    </div>
+  </section>
+
+  <div class="test-results">
+    <h2>Automated Test Results</h2>
+    <div id="test-output"></div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    // Run automated tests
+    function runTests() {
+      const output = document.getElementById('test-output');
+      const results = [];
+
+      // Test Greeting Component
+      results.push('<h3>Greeting Component Tests</h3>');
+      
+      const greetingComp = new GreetingComponent(document.getElementById('greeting-section'));
+      
+      // Test 1: Greeting logic
+      const testGreeting = (hour, expected) => {
+        const result = greetingComp.getGreeting(hour);
+        const pass = result === expected;
+        results.push(`<div class="test-case"><span class="${pass ? 'pass' : 'fail'}">${pass ? 'PASS' : 'FAIL'}</span>: getGreeting(${hour}) = "${result}" (expected "${expected}")</div>`);
+      };
+
+      testGreeting(5, 'Good morning');
+      testGreeting(11, 'Good morning');
+      testGreeting(12, 'Good afternoon');
+      testGreeting(16, 'Good afternoon');
+      testGreeting(17, 'Good evening');
+      testGreeting(20, 'Good evening');
+      testGreeting(21, 'Good night');
+      testGreeting(4, 'Good night');
+
+      // Test 2: Time formatting
+      const testTime = (hours, minutes, expected) => {
+        const date = new Date(2024, 0, 1, hours, minutes);
+        const result = greetingComp.formatTime(date);
+        const pass = result === expected;
+        results.push(`<div class="test-case"><span class="${pass ? 'pass' : 'fail'}">${pass ? 'PASS' : 'FAIL'}</span>: formatTime(${hours}:${minutes}) = "${result}" (expected "${expected}")</div>`);
+      };
+
+      testTime(0, 0, '12:00 AM');
+      testTime(1, 30, '1:30 AM');
+      testTime(12, 0, '12:00 PM');
+      testTime(13, 45, '1:45 PM');
+      testTime(23, 59, '11:59 PM');
+
+      // Test 3: Date formatting
+      const testDate = new Date(2024, 0, 15);
+      const dateResult = greetingComp.formatDate(testDate);
+      const datePass = dateResult === 'Monday, January 15';
+      results.push(`<div class="test-case"><span class="${datePass ? 'pass' : 'fail'}">${datePass ? 'PASS' : 'FAIL'}</span>: formatDate() = "${dateResult}" (expected "Monday, January 15")</div>`);
+
+      // Test Timer Component
+      results.push('<h3>Focus Timer Component Tests</h3>');
+      
+      const timerComp = new FocusTimerComponent(document.getElementById('timer-section'));
+      
+      // Test 4: Initial state
+      const initialSecondsPass = timerComp.totalSeconds === 1500 && timerComp.remainingSeconds === 1500;
+      results.push(`<div class="test-case"><span class="${initialSecondsPass ? 'pass' : 'fail'}">${initialSecondsPass ? 'PASS' : 'FAIL'}</span>: Initial timer state = ${timerComp.totalSeconds}s total, ${timerComp.remainingSeconds}s remaining (expected 1500s)</div>`);
+      
+      const initialRunningPass = timerComp.isRunning === false;
+      results.push(`<div class="test-case"><span class="${initialRunningPass ? 'pass' : 'fail'}">${initialRunningPass ? 'PASS' : 'FAIL'}</span>: Initial running state = ${timerComp.isRunning} (expected false)</div>`);
+
+      // Test 5: formatTime method
+      const testTimerFormat = (seconds, expected) => {
+        const result = timerComp.formatTime(seconds);
+        const pass = result === expected;
+        results.push(`<div class="test-case"><span class="${pass ? 'pass' : 'fail'}">${pass ? 'PASS' : 'FAIL'}</span>: formatTime(${seconds}) = "${result}" (expected "${expected}")</div>`);
+      };
+
+      testTimerFormat(0, '00:00');
+      testTimerFormat(59, '00:59');
+      testTimerFormat(60, '01:00');
+      testTimerFormat(1500, '25:00');
+      testTimerFormat(3599, '59:59');
+
+      // Test 6: Start/Stop functionality
+      timerComp.start();
+      const startPass = timerComp.isRunning === true && timerComp.intervalId !== null;
+      results.push(`<div class="test-case"><span class="${startPass ? 'pass' : 'fail'}">${startPass ? 'PASS' : 'FAIL'}</span>: start() sets isRunning=true and creates interval</div>`);
+      
+      timerComp.stop();
+      const stopPass = timerComp.isRunning === false && timerComp.intervalId === null;
+      results.push(`<div class="test-case"><span class="${stopPass ? 'pass' : 'fail'}">${stopPass ? 'PASS' : 'FAIL'}</span>: stop() sets isRunning=false and clears interval</div>`);
+
+      // Test 7: Reset functionality
+      timerComp.remainingSeconds = 100;
+      timerComp.reset();
+      const resetPass = timerComp.remainingSeconds === 1500 && timerComp.isRunning === false;
+      results.push(`<div class="test-case"><span class="${resetPass ? 'pass' : 'fail'}">${resetPass ? 'PASS' : 'FAIL'}</span>: reset() restores timer to 1500s and stops it</div>`);
+
+      output.innerHTML = results.join('');
+    }
+
+    // Wait for components to initialize, then run tests
+    setTimeout(runTests, 500);
+  </script>
+</body>
+</html>
