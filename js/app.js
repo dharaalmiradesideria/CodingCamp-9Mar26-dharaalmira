@@ -136,7 +136,7 @@ class TaskListComponent {
   }
 
   init() {
-    // Implementation pending
+    this.loadLinks();
   }
 
   loadTasks() {
@@ -214,7 +214,7 @@ class QuickLinksComponent {
   }
 
   init() {
-    // Implementation pending
+    this.loadLinks();
   }
 
   loadLinks() {
